@@ -133,11 +133,11 @@ Choose the deployment option that matches your infrastructure and requirements:
 
     **When to use this option**:
     
-    - You understand this is NOT production-ready
-    - You need continuous monitoring visibility (no 2-5 min gaps)
-    - You have strict SLA requirements for sub-30-second failover
-    - You need multiple active PMM instances for load distribution
-    - You have expert Kubernetes skills
-    - You are evaluating zero-downtime architecture for future production, or testing environments where you need to validate continuous monitoring capabilities
+    - you understand this is NOT production-ready
+    - you need continuous monitoring visibility (no 2-5 min gaps)
+    - you have strict SLA requirements for sub-30-second failover
+    - you need multiple active PMM instances for load distribution
+    - you have expert Kubernetes skills
+    - you are evaluating zero-downtime architecture for future production, or testing environments where you need to validate continuous monitoring capabilities
 
     [View Kubernetes HA Cluster installation guide →](../install-pmm/HA-clustered.md)
