@@ -31,7 +31,7 @@ Whether a server crashes, you're upgrading software, or scaling your infrastruct
 - **Resilient data storage**: Distributed databases (ClickHouse, VictoriaMetrics, PostgreSQL) eliminate single points of failure
 - **Scales with your needs**: Add more capacity as your database infrastructure grows
 
-### When to use each deployment type
+### Single-Instance vs HA Clustered
 
 | Consideration | Single-Instance (GA) | HA Clustered (Tech Preview) |
 |--------------|----------------------|-----------------------------|
@@ -44,18 +44,45 @@ Whether a server crashes, you're upgrading software, or scaling your infrastruct
 | **Load balancing** | No | Yes (HAProxy) |
 | **Databases** | Built-in | External clusters |
 
+
+## Prerequisites
+
+### Required software
+
+- **Kubernetes**: 1.22 or higher
+- **Helm**: 3.2.0 or higher
+- **kubectl**: Configured to access your cluster
+- **Persistent Volume Provisioner**: Available in your cluster
+
+### Required Kubernetes operators
+
+PMM HA requires three Kubernetes operators to manage distributed database resources:
+
+- **VictoriaMetrics Operator** (v0.56.4+): Manages VictoriaMetrics cluster for metrics storage
+- **Altinity ClickHouse Operator** (v0.25.4+): Manages ClickHouse cluster for QAN data
+- **Percona PostgreSQL Operator** (v2.8.0+): Manages PostgreSQL cluster for Grafana metadata
+
+You can install these operators via the `pmm-ha-dependencies` chart (recommended) or manually. See [Installation](#installation) for details.
+
+### Platform compatibility
+
+!!! info "Tested Platform: Amazon EKS Only"
+    This Tech Preview is validated exclusively on **Amazon EKS (Kubernetes 1.24+)**. Other platforms (GKE, AKS, on-premise, OpenShift) may work but are untested. VMware Tanzu is not supported.
+
+### Resource requirements
+
+**Minimum cluster resources:**
+
+- **CPU**: 10-20 cores
+- **Memory**: 20-40 GB RAM
+- **Storage**: 100+ GB with PV provisioner
+
+These minimums support 1-10 monitored services. For production sizing guidance, see [Resource Planning](#resource-planning).
+
+
 ## Quickstart installation
 
 Get PMM HA Cluster running in 10 minutes with this simplified setup. For advanced configuration options, see [full installation](#installation).
-
-**Prerequisites:** 
-
-- Kubernetes 1.22+
-- Helm 3.2.0+
-- kubectl configured and connected to your cluster
-- PV provisioner support
-
-**Quick install steps:**
 {.power-number}
 
 1. Add Percona Helm repository:
@@ -119,41 +146,6 @@ Get PMM HA Cluster running in 10 minutes with this simplified setup. For advance
    # Login: admin / your-secure-password
    ```
 
-## Prerequisites
-
-### Required software
-
-- **Kubernetes**: 1.22 or higher
-- **Helm**: 3.2.0 or higher
-- **kubectl**: Configured to access your cluster
-- **Persistent Volume Provisioner**: Available in your cluster
-
-### Required Kubernetes operators
-
-PMM HA requires three Kubernetes operators to manage distributed database resources:
-
-- **VictoriaMetrics Operator** (v0.56.4+): Manages VictoriaMetrics cluster for metrics storage
-- **Altinity ClickHouse Operator** (v0.25.4+): Manages ClickHouse cluster for QAN data
-- **Percona PostgreSQL Operator** (v2.8.0+): Manages PostgreSQL cluster for Grafana metadata
-
-You can install these operators via the `pmm-ha-dependencies` chart (recommended) or manually. See [Installation](#installation) for details.
-
-### Platform compatibility
-
-!!! info "Tested Platform: Amazon EKS Only"
-    This Tech Preview is validated exclusively on **Amazon EKS (Kubernetes 1.24+)**. Other platforms (GKE, AKS, on-premise, OpenShift) may work but are untested. VMware Tanzu is not supported.
-
-### Resource requirements
-
-**Minimum cluster resources:**
-
-- **CPU**: 10-20 cores
-- **Memory**: 20-40 GB RAM
-- **Storage**: 100+ GB with PV provisioner
-
-These minimums support 1-10 monitored services. For production sizing guidance, see [Resource Planning](#resource-planning).
-
-
 ## Architecture
 
 PMM HA Clustered uses a two-step installation process that separates database operators from monitoring components. This separation simplifies upgrades and prevents cleanup issues when uninstalling.
@@ -214,6 +206,7 @@ Installs monitoring infrastructure:
 ### Installation overview
 
 PMM HA installation follows these steps:
+{.power-number}
 
 1. Add Helm repository
 2. Create namespace
@@ -221,16 +214,6 @@ PMM HA installation follows these steps:
 4. Create PMM credentials secret
 5. Install PMM HA
 6. Verify installation
-
-### Prerequisites checklist
-
-Before installing, ensure you have:
-
-- Kubernetes 1.22+ cluster
-- Helm 3.2.0+ installed
-- kubectl configured
-- PV provisioner available
-- Sufficient cluster resources (see [Prerequisites](#prerequisites))
 
 ### Step 1: Add Percona Helm repository
 {.power-number}
@@ -796,7 +779,6 @@ pmmResources:
 
 For a complete list of parameters, see the [values.yaml file](https://github.com/percona/percona-helm-charts/blob/main/charts/pmm-ha/values.yaml).
 
-
 ### Connect PMM clients
 
 To connect a PMM client to the HA cluster, use the HAProxy service endpoint:
@@ -842,6 +824,7 @@ The PMM UI displays a badge showing the current leader PMM node and cluster heal
 
 - **Leader node name**: Displays which PMM instance (e.g., `pmm-ha-0`, `pmm-ha-1`, `pmm-ha-2`) is currently handling monitoring operations
 - **Health status indicators**:
+
   - **Healthy**: All nodes in "alive" status
   - **Degraded**: ⅓ of nodes not in "alive" status  
   - **Critical**: ⅔ of nodes not in "alive" status
@@ -1228,3 +1211,4 @@ This Tech Preview release is designed to gather community feedback before Genera
 - What's challenging or confusing?
 - What features are you missing?
 - How does performance compare to single-instance deployments?
+
