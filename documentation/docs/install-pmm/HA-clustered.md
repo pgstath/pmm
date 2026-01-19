@@ -5,7 +5,7 @@ Standard PMM monitoring goes offline for minutes during server failures. PMM HA 
 !!! warning "Technical Preview: Not Production-Ready"
     This feature is in **Technical Preview** for testing and feedback only. Expect [known issues](#known-issues-and-limitations), breaking changes, and incomplete features. 
     
-    **Test in non-production environments only** and [provide feedback](#providing-feedback) to shape the GA release.
+    **Test in non-production environments only** and [provide feedback](#provide-feedback) to shape the GA release.
 
 !!! danger "VictoriaMetrics limitations"
     This Tech Preview does not support:
@@ -15,11 +15,11 @@ Standard PMM monitoring goes offline for minutes during server failures. PMM HA 
     
     If your strategy requires these features, evaluate carefully before testing.
 
-## What is PMM HA Clustered?
+## Understand PMM HA Clustered
 
 PMM HA Clustered keeps your database monitoring running continuously, even when servers fail or during maintenance windows.
 
-Unlike single-instance deployments where a server failure means minutes of monitoring downtime, PMM HA Clustered automatically switches to backup servers in under 30 seconds. 
+Unlike [single-instance deployments](HA-kubernetes-single-instance.md.md) where a server failure means minutes of monitoring downtime, PMM HA Clustered automatically switches to backup servers in under 30 seconds. 
 
 Whether a server crashes, you're upgrading software, or scaling your infrastructure, your monitoring stays active with no blind spots or missed incidents.
 
@@ -31,7 +31,7 @@ Whether a server crashes, you're upgrading software, or scaling your infrastruct
 - **Resilient data storage**: Distributed databases (ClickHouse, VictoriaMetrics, PostgreSQL) eliminate single points of failure
 - **Scales with your needs**: Add more capacity as your database infrastructure grows
 
-### Single-Instance vs HA Clustered
+### Choose your Kubernetes deployment type
 
 | Consideration | Single-Instance (GA) | HA Clustered (Tech Preview) |
 |--------------|----------------------|-----------------------------|
@@ -43,20 +43,20 @@ Whether a server crashes, you're upgrading software, or scaling your infrastruct
 | **PMM instances** | 1 pod | 3 pods with leader election |
 | **Load balancing** | No | Yes (HAProxy) |
 | **Databases** | Built-in | External clusters |
+| **Anti-affinity** | No | Yes (pods distributed across nodes) |
 
+## Before you begin
 
-## Prerequisites
-
-### Required software
+### Check prerequisites
 
 - **Kubernetes**: 1.22 or higher
 - **Helm**: 3.2.0 or higher
 - **kubectl**: Configured to access your cluster
 - **Persistent Volume Provisioner**: Available in your cluster
 
-### Required Kubernetes operators
+### Verify Kubernetes operators
 
-PMM HA requires three Kubernetes operators to manage distributed database resources:
+PMM HA requires three Kubernetes operators to manage distributed database resources. These operators must be installed **before** deploying PMM HA, as they manage the lifecycle of database resources through Custom Resource Definitions (CRDs).
 
 - **VictoriaMetrics Operator** (v0.56.4+): Manages VictoriaMetrics cluster for metrics storage
 - **Altinity ClickHouse Operator** (v0.25.4+): Manages ClickHouse cluster for QAN data
@@ -64,51 +64,28 @@ PMM HA requires three Kubernetes operators to manage distributed database resour
 
 You can install these operators via the `pmm-ha-dependencies` chart (recommended) or manually. See [Installation](#installation) for details.
 
-### Platform compatibility
+### Check if your platform is supported
 
-!!! info "Tested Platform: Amazon EKS Only"
+!!! info "Tested Platform: Amazon EKS only"
     This Tech Preview is validated exclusively on **Amazon EKS (Kubernetes 1.24+)**. Other platforms (GKE, AKS, on-premise, OpenShift) may work but are untested. VMware Tanzu is not supported.
 
-### Resource requirements
+## Plan your resources
 
-**Minimum cluster resources:**
+Before installing PMM HA, ensure your Kubernetes cluster has sufficient capacity to run the distributed architecture. This section helps you calculate the resources you'll need based on your monitoring requirements.
+
+### Minimum cluster requirements
+
+At minimum, your cluster needs:
 
 - **CPU**: 10-20 cores
 - **Memory**: 20-40 GB RAM
-- **Storage**: 100+ GB with PV provisioner
+- **Storage**: 100+ GB with persistent volume provisioner
 
-These minimums support 1-10 monitored services. For production sizing guidance, see [Resource Planning](#resource-planning).
-
-## Architecture
-
-PMM HA Clustered uses a two-step installation process that separates database operators from monitoring components. This separation simplifies upgrades and prevents cleanup issues when uninstalling.
-
-### Architecture diagram
-
-![HA Clustered diagram](../images/HA-diagram.jpg)
-
-
-### Installation components
-
-**Step 1: Install Operators**
-
-Installs Kubernetes operators to create and manage database clusters:
-
-- VictoriaMetrics Operator
-- ClickHouse Operator
-- PostgreSQL Operator
-
-**Step 2: Install PMM HA**
-
-Installs monitoring infrastructure:
-
-- **3 PMM monitoring servers**: One active leader, two standbys for instant failover
-- **HAProxy load balancer**: Routes traffic to healthy servers
-- **Database clusters**: ClickHouse (Query Analytics), VictoriaMetrics (metrics), PostgreSQL (dashboards)
-
-## Resource planning
+This baseline supports monitoring **1-10 database services** with standard retention periods. If you're planning a larger deployment, use the sizing guidelines below to calculate your resource needs.
 
 ### Sizing guidelines
+
+Use this table to estimate resources based on your monitoring scale:
 
 | Monitored services | PMM replicas | ClickHouse replicas | VictoriaMetrics storage | Total CPU | Total memory | Total storage |
 |-------------------|--------------|---------------------|------------------------|-----------|--------------|---------------|
@@ -119,13 +96,17 @@ Installs monitoring infrastructure:
 
 ### Factors affecting resource usage
 
+Your actual resource needs may vary based on:
+
 - Number of monitored database instances
 - Metrics resolution and retention period
 - Query Analytics (QAN) volume
 - Number of concurrent users
 - Custom dashboards and queries
 
-### Component resource breakdown
+### Understand how resources are distributed
+
+PMM HA spreads resource consumption across multiple components to ensure high availability. Understanding this breakdown helps you identify which components to scale as your monitoring needs grow, and where bottlenecks might occur.
 
 | Component | CPU | Memory | Storage | Notes |
 |-----------|-----|--------|---------|-------|
@@ -136,7 +117,44 @@ Installs monitoring infrastructure:
 | **PostgreSQL cluster** | 1-2 cores | 2-4 GB | 10 GB | Grafana metadata storage |
 | **Kubernetes operators** | 1-2 cores | 2-4 GB | - | Operator management overhead |
 
-## Installation
+## Learn the architecture
+
+PMM HA Clustered uses a two-step installation process that separates database operators from monitoring components. This separation simplifies upgrades and prevents cleanup issues when uninstalling.
+
+The PMM HA architecture diagram below, shows how components interact and communicate. The architecture consists of three PMM server replicas with automatic leader election, HAProxy load balancers for traffic distribution, and operator-managed database clusters (ClickHouse, VictoriaMetrics, and PostgreSQL) for resilient data storage:
+
+![HA Clustered diagram](../images/HA-diagram.jpg)
+
+### Learn high availability mechanisms
+PMM HA uses several mechanisms to ensure continuous operation:
+
+- Leader election: PMM servers use Raft consensus protocol for leader election (ports 9096, 9097)
+- Automatic failover: HAProxy detects unhealthy PMM servers and routes to healthy ones
+- Pod anti-affinity: Kubernetes scheduler distributes components across different nodes
+- Health checks: Comprehensive readiness and liveness probes on all components
+- Rolling updates: Zero-downtime upgrades with sequential pod updates
+
+### Understand two-step installation
+
+#### Step 1: Install operators
+
+Installs Kubernetes operators to create and manage database clusters:
+
+- VictoriaMetrics Operator
+- ClickHouse Operator
+- PostgreSQL Operator
+
+#### Step 2: Install PMM HA
+
+Installs monitoring infrastructure:
+
+- **3 PMM monitoring servers**: Automatic leader election with Raft consensus (one active leader, two standbys)
+- **3 HAProxy load balancers**: Routes traffic to healthy servers with pod anti-affinity
+- **ClickHouse cluster**: 3 replicas with ClickHouse Keeper for Query Analytics storage (managed by Altinity ClickHouse Operator)
+- **VictoriaMetrics cluster**: Distributed metrics storage with multiple replicas (managed by VictoriaMetrics Operator)
+- **PostgreSQL cluster**: HA cluster for Grafana metadata (managed by Percona PostgreSQL Operator)
+
+##  Install PMM HA
 
 === "Quickstart installation"
 
@@ -204,18 +222,7 @@ Installs monitoring infrastructure:
       # Login: admin / your-secure-password
       ```
 
-
-=== "Full Installation"===
-
-    PMM HA installation follows these steps:
-    {.power-number}
-
-    1. Add Helm repository
-    2. Create namespace
-    3. Install Kubernetes operators
-    4. Create PMM credentials secret
-    5. Install PMM HA
-    6. Verify installation
+=== "Full installation"
 
     ### Step 1: Add Percona Helm repository
     {.power-number}
@@ -348,13 +355,13 @@ Installs monitoring infrastructure:
 
     ### Step 5: Install PMM HA
 
-    === "Default installation"===
+    === "Default installation"
 
     ```sh
     helm install pmm-ha percona/pmm-ha --namespace pmm
     ```
 
-    === "Custom configuration"===
+    === "Custom configuration"
 
     Create a `values.yaml` file:
 
@@ -404,46 +411,44 @@ Installs monitoring infrastructure:
 
 ## Access PMM after installation
 
-### Quick access via port-forward
+### Access via port-forward
 
 For immediate testing:
 
+1. Create a port-forward to the HAProxy service:
 ```sh
 kubectl port-forward -n pmm svc/pmm-ha-haproxy 8443:443
 ```
+2. Open https://localhost:8443 in your browser.
 
-Open https://localhost:8443 in your browser.
+3. Log in with the default credentials:
+  - Username: `admin`
+  - Password: Value from `PMM_ADMIN_PASSWORD` in your secret
 
-**Default credentials:**
+### Use service endpoints
 
-- Username: `admin`
-- Password: Value from `PMM_ADMIN_PASSWORD` in your secret
+PMM HA exposes multiple service endpoints for different purposes. For all external connections to PMM (including PMM Clients, web browsers, API calls, and Percona Operators) always use **`pmm-ha-haproxy`**. This load balancer automatically routes traffic to the active PMM leader and handles failover transparently.
 
-### Service endpoints
-
-PMM HA provides the following service endpoints:
-
-| Service | Description | Port | Use For |
+| Service | Description | Port | Use for |
 |---------|-------------|------|---------|
-| `pmm-ha-haproxy` | **Recommended** - HAProxy load balancer that routes to the active PMM leader | 443 (HTTPS) | All external clients, PMM Clients, Percona Operators |
-| `monitoring-service` | Headless service for direct PMM pod access (used internally) | 8443 (HTTPS) | Internal cluster communication only |
+| `pmm-ha-haproxy` | HAProxy load balancer with automatic failover | 443 (HTTPS) | **All external access**: PMM Clients, web browser, API calls, Percona Operators |
+| `monitoring-service` | Headless service for direct PMM pod access. **⚠️ Do not use directly** - bypasses load balancer, can cause connection failures during leader changes or maintenance | 8443 (HTTPS) | Internal cluster communication only |
 
-### Which endpoint should I use?
+**Access database components (advanced)**
 
-**For all external connections:** Always use `pmm-ha-haproxy`
+For direct database access or troubleshooting, PMM HA also exposes:
 
-- PMM Clients connecting to the server
-- Web browser access
-- API calls
-- Percona Operators
+| Component | Service Name | Port | Purpose |
+|-----------|--------------|------|---------|
+| ClickHouse | `clickhouse-[release-name]` | 8123 (HTTP), 9000 (Native) | Direct QAN database access |
+| VictoriaMetrics | `vmstorage-[release-name]` | 8482 | Direct metrics storage access |
+| PostgreSQL | `[release-name]-pgha-[cluster]` | 5432 | Direct Grafana database access |
 
-**Never use `monitoring-service`** - it's for internal Kubernetes cluster communication only.
-
-## Configuration PMM HA deployment
+## Configure PMM HA
 
 ### Configure external access
 
-By default, HAProxy is only accessible within the Kubernetes cluster. To enable external access, configure the HAProxy service type.
+By default, HAProxy is only accessible within the Kubernetes cluster. To enable external access, configure the HAProxy service type:
 
 === "LoadBalancer (Recommended)"
 
@@ -505,7 +510,7 @@ By default, HAProxy is only accessible within the Kubernetes cluster. To enable 
     ```
 
     !!! warning "NodePort limitations"
-        - Ports are typically in the range 30000-32767
+        - Ports are typically in the range '30000-32767'
         - You must manage firewall rules to allow access to this port
         - Any node IP can be used, but if that node fails, you need to use a different node IP
         - Consider using a LoadBalancer or Ingress for production deployments
@@ -537,7 +542,7 @@ By default, HAProxy is only accessible within the Kubernetes cluster. To enable 
     # Access via: https://localhost:8443
     ```
 
-### Cloud-specific configurations
+### Apply cloud-specific configurations
 
 Configure LoadBalancer settings optimized for your cloud provider:
 
@@ -663,12 +668,12 @@ Configure LoadBalancer settings optimized for your cloud provider:
 
     **Prerequisites:**
 
-    1. Install MetalLB in your cluster:
+    - Install MetalLB in your cluster:
        ```sh
        kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.12/config/manifests/metallb-native.yaml
        ```
 
-    2. Configure an IP address pool:
+    - Configure an IP address pool:
        ```yaml
        apiVersion: metallb.io/v1beta1
        kind: IPAddressPool
@@ -690,7 +695,7 @@ Configure LoadBalancer settings optimized for your cloud provider:
         - Use Layer 2 mode for simplicity or BGP mode for advanced routing
         - Ensure your network infrastructure routes traffic to these IPs correctly
 
-### Custom SSL certificates
+### Set up custom SSL certificates
 
 PMM ships with self-signed SSL certificates. For production, provide your own certificates:
 
@@ -746,7 +751,7 @@ storage:
     apiGroup: snapshot.storage.k8s.io
 ```
 
-### Configure resource limits
+### Set resource limits
 
 Configure resource requests and limits for PMM server pods:
 
@@ -760,7 +765,44 @@ pmmResources:
     memory: "8Gi"
 ```
 
-### Helm parameters reference
+### Customize environment variables
+
+PMM HA uses environment variables to control its behavior. The HA-specific variables are pre-configured for optimal cluster operation, while data retention and other settings can be customized to match your requirements.
+
+**Pre-configured HA variables:**
+
+These variables are automatically set and manage critical cluster functions like leader election, gossip communication, and database integration:
+
+```yaml
+pmmEnv:
+  DISABLE_UPDATES: "1"                      # Updates managed via Helm (not UI)
+  PMM_HA_ENABLE: "1"                        # Enable HA clustering
+  PMM_HA_GOSSIP_PORT: "9096"                # Gossip protocol port
+  PMM_HA_RAFT_PORT: "9097"                  # Raft consensus port
+  PMM_HA_GRAFANA_GOSSIP_PORT: "9094"        # Grafana gossip port
+  PMM_DISABLE_BUILTIN_CLICKHOUSE: "1"       # Use external ClickHouse
+  PMM_DISABLE_BUILTIN_POSTGRES: "1"         # Use external PostgreSQL
+  PMM_CLICKHOUSE_IS_CLUSTER: "1"            # Enable ClickHouse clustering
+```
+
+These variables are tested and validated for the HA architecture - modifying them is not recommended. PMM updates are managed through Helm chart upgrades rather than the UI to ensure consistency across all replicas.
+
+**Customizable settings:**
+
+Adjust these variables in your `values.yaml` to match your monitoring requirements:
+
+```yaml
+pmmEnv:
+  DATA_RETENTION: "2160h"  # Adjust based on your retention policy (default: 90 days)
+  # Add other environment variables as needed
+```
+
+**Common customizations:**
+
+- **Data retention**: Set `DATA_RETENTION` based on your compliance requirements and storage capacity (e.g., `720h` for 30 days, `4320h` for 180 days)
+- **Additional variables**: See [PMM environment variables documentation](https://docs.percona.com/percona-monitoring-and-management/setting-up/server/docker.html#environment-variables) for all available options
+
+### Review Helm parameters reference
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
@@ -779,9 +821,11 @@ pmmResources:
 | `pg-db.enabled` | Enable PostgreSQL cluster | `true` |
 | `pg-db.pmm.enabled` | Enable automatic PMM monitoring of PostgreSQL | `true` |
 
-For a complete list of parameters, see the [values.yaml file](https://github.com/percona/percona-helm-charts/blob/main/charts/pmm-ha/values.yaml).
+For a complete list of parameters, see the [values.yaml file](https://github.com/percona/percona-helm-charts/blob/main/charts/pmm/values.yaml).
 
-### Connect PMM Clients
+## Use and maintain PMM HA
+
+### Connect monitoring clients
 
 To connect a PMM client to the HA cluster, use the HAProxy service endpoint:
 
@@ -797,7 +841,7 @@ pmm-admin config \
   --server-insecure-tls
 ```
 
-### PostgreSQL automatic monitoring
+### Enable automatic PostgreSQL monitoring
 
 When `pg-db.pmm.enabled: true` (default), PostgreSQL metrics are automatically pushed to PMM:
 
@@ -807,7 +851,7 @@ When `pg-db.pmm.enabled: true` (default), PostgreSQL metrics are automatically p
 
 **No manual configuration required** - the Percona PostgreSQL Operator handles the integration automatically.
 
-### Retrieve service tokens
+### Manage service tokens
 
 To retrieve the auto-generated PostgreSQL monitoring token:
 
@@ -818,9 +862,9 @@ kubectl get secret pg-pmm-secret -n pmm \
 
 To create additional service tokens manually, see the [PMM documentation on service accounts](https://docs.percona.com/percona-monitoring-and-management/api/authentication.html).
 
-### Key features
+### Monitor HA feature
 
-#### Leader node identification
+#### Identify the leader node
 
 The PMM UI displays a badge showing the current leader PMM node and cluster health status:
 
@@ -836,7 +880,7 @@ Access via: **PMM Home Dashboard > HA Badge** (top right corner)
 
 **Note**: Due to a known issue (see [Known Issues](#known-issues-and-limitations)), the health status may not always display correctly in this Tech Preview release.
 
-#### HA role information in inventory
+#### View HA roles in inventory
 
 View detailed HA role information for all PMM nodes in the Inventory:
 {.power-number}
@@ -854,7 +898,7 @@ View detailed HA role information for all PMM nodes in the Inventory:
 
 This provides a centralized view of your entire PMM HA cluster state.
 
-### Scale PMM HA deployment
+### Scale your deployment
 
 #### Scale PMM server replicas
 
@@ -908,7 +952,7 @@ helm upgrade pmm-ha percona/pmm-ha \
 
 PostgreSQL scaling is managed through the Percona PostgreSQL Operator. See the [Operator documentation](https://docs.percona.com/percona-operator-for-postgresql/) for details.
 
-#### Pre-pulling images before scaling
+#### Pre-pull images before scaling
 
 PMM images can be large (several GB). Before performing upgrades or scaling operations, pre-pull images on all nodes to avoid timeout issues:
 
@@ -920,7 +964,7 @@ kubectl get nodes
 kubectl debug node/node1 -it --image=percona/pmm-server:3.5.0
 ```
 
-### Monitoring and health checks
+### Monitor cluster health
 
 To check the health of your PMM HA deployment:
 
@@ -952,7 +996,7 @@ kubectl logs -l app.kubernetes.io/name=pmm -n pmm --tail=100
 kubectl logs -l app.kubernetes.io/name=haproxy -n pmm --tail=100
 ```
 
-### Upgrades
+### Upgrade PMM HA
 
 PMM HA uses rolling updates for zero-downtime upgrades. Each pod updates sequentially while HAProxy maintains traffic flow.
 
@@ -1003,7 +1047,7 @@ PMM HA uses rolling updates for zero-downtime upgrades. Each pod updates sequent
     !!! tip "Preserving custom configuration"
         Always use the same `values.yaml` file (or flags) that you used during installation to avoid losing custom settings during upgrades.
 
-#### Rollback
+#### Roll back upgrades
 
 If an upgrade fails, rollback to the previous version:
 
@@ -1011,7 +1055,7 @@ If an upgrade fails, rollback to the previous version:
 helm rollback pmm-ha --namespace pmm
 ```
 
-## Troubleshoot cmmon issues
+## Troubleshoot issues
 
 **Issue**: Pods stuck in `Pending` state
 
@@ -1051,9 +1095,7 @@ kubectl patch <resource-type> <resource-name> -n pmm \
   -p '{"metadata":{"finalizers":[]}}' --type=merge
 ```
 
-## Known issues and limitations
-
-### Known issues
+## Review known issues
 
 We are aware of the following issues in this Tech Preview version and plan to fix them before General Availability:
 
@@ -1067,7 +1109,7 @@ We are aware of the following issues in this Tech Preview version and plan to fi
 
 [View all tracked issues →](https://perconadev.atlassian.net/issues/?jql=parent%3DPMM-14338%20and%20issuetype%3DBug%20and%20status%20not%20in%20(done%2C%20%22Pending%20Release%22)%20ORDER%20BY%20rank)
 
-### Scaling limitations
+### Understand scaling limitations
 
 !!! danger "Scaling down to single replica"
     When scaling down to a single PMM replica (from 3 to 1), ensure the **Raft leader is on pmm-0** before scaling. Kubernetes StatefulSets remove pods in reverse ordinal order (highest first).
@@ -1082,7 +1124,7 @@ We are aware of the following issues in this Tech Preview version and plan to fi
     
     Only scale down after confirming `pmm-0` is the leader.
 
-### VictoriaMetrics enterprise limitations
+### Review VictoriaMetrics limitations
 
 PMM HA Tech Preview does not support these VictoriaMetrics Enterprise features:
 
@@ -1091,7 +1133,7 @@ PMM HA Tech Preview does not support these VictoriaMetrics Enterprise features:
 
 **Impact**: If you currently rely on these features, plan accordingly for your monitoring strategy.
 
-## Uninstall
+## Uninstall PMM HA
 
 !!! danger "Critical: Follow this exact order"
     Uninstalling out of sequence leaves orphaned resources that cannot be auto-cleaned.
@@ -1180,7 +1222,7 @@ kubectl delete pvc -l app.kubernetes.io/instance=pmm-ha -n pmm
 kubectl delete namespace pmm
 ```
 
-### Verify uninstallation
+### Verify complete removal
 
 After uninstalling, verify all resources are removed:
 
@@ -1195,21 +1237,18 @@ kubectl get crds | grep -E "(victoriametrics|clickhouse|postgres-operator|percon
 kubectl get pvc -n pmm
 ```
 
-## Provide feedback
+## Get help and provide feedback
 
-This Tech Preview release is designed to gather community feedback before General Availability. Your feedback directly influences the feature set and improvements for the GA release!
+This Tech Preview release is designed to gather community feedback before GA. Your feedback directly influences the feature set and improvements for the GA version!
 
 ### Contact us
 
-- **[Community Slack](https://percona.community/join-percona-slack)** - Real-time chat with engineers and community
-- **[Percona Support](https://www.percona.com/services/support)** - Enterprise support for production issues
+- Join the [PMM Community Forums](https://per.co.na/PMM3_forums) to discuss features, ask questions, and chat in real time with engineers and other users.
+- [Contact Percona Support](https://www.percona.com/services/support) for enterprise-level help with production issues.
+ for enterprise-level help with production issues.
+- Report bugs or technical issues through the [PMM JIRA Issue Tracker](https://perconadev.atlassian.net/jira/software/c/projects/PMM/issues/)
 
-### Report issues
-
-- **[PMM Jira Issue Tracker](https://perconadev.atlassian.net/jira/software/c/projects/PMM/issues/)** - Report bugs and technical issues
-- **[Percona Community Forum](https://forums.percona.com/c/percona-monitoring-and-management-pmm/)** - Discuss features and ask questions
-
-### What we want to hear
+### Share your experience
 
 - What works well in your environment?
 - What's challenging or confusing?
