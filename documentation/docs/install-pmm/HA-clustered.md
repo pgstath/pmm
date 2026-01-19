@@ -79,73 +79,6 @@ You can install these operators via the `pmm-ha-dependencies` chart (recommended
 
 These minimums support 1-10 monitored services. For production sizing guidance, see [Resource Planning](#resource-planning).
 
-
-## Quickstart installation
-
-Get PMM HA Cluster running in 10 minutes with this simplified setup. For advanced configuration options, see [full installation](#installation).
-{.power-number}
-
-1. Add Percona Helm repository:
-   ```sh
-   helm repo add percona https://percona.github.io/percona-helm-charts/
-   helm repo update
-   ```
-
-2. Create namespace:
-   ```sh
-   kubectl create namespace pmm
-   ```
-
-3. Install required Kubernetes operators:
-   ```sh
-   helm install pmm-operators percona/pmm-ha-dependencies --namespace pmm
-   
-   # Wait for all operators to be ready (typically 2-3 minutes)
-   kubectl wait --for=condition=ready pod \
-     -l app.kubernetes.io/name=victoria-metrics-operator \
-     -n pmm --timeout=300s
-   kubectl wait --for=condition=ready pod \
-     -l app.kubernetes.io/name=altinity-clickhouse-operator \
-     -n pmm --timeout=300s
-   kubectl wait --for=condition=ready pod \
-     -l app.kubernetes.io/name=pg-operator \
-     -n pmm --timeout=300s
-   ```
-
-4. Create PMM secret with your passwords:
-   ```sh
-   kubectl create secret generic pmm-secret \
-     --from-literal=PMM_ADMIN_PASSWORD="your-secure-password" \
-     --from-literal=PMM_CLICKHOUSE_USER="clickhouse_pmm" \
-     --from-literal=PMM_CLICKHOUSE_PASSWORD="clickhouse-password" \
-     --from-literal=VMAGENT_remoteWrite_basicAuth_username="victoriametrics_pmm" \
-     --from-literal=VMAGENT_remoteWrite_basicAuth_password="vm-password" \
-     --from-literal=PG_PASSWORD="postgres-password" \
-     --from-literal=GF_PASSWORD="grafana-password" \
-     --namespace pmm
-   ```
-
-5. Install PMM HA:
-   ```sh
-   helm install pmm-ha percona/pmm-ha --namespace pmm
-   ```
-
-6. Wait for deployment to complete:
-   ```sh
-   kubectl wait --for=condition=ready pod \
-     -l app.kubernetes.io/name=pmm \
-     -n pmm --timeout=600s
-   ```
-
-7. Access PMM UI:
-   ```sh
-   # Port-forward for local access
-   kubectl port-forward -n pmm svc/pmm-ha-haproxy 8443:443
-   
-   # Open https://localhost:8443 in your browser
-   # Login: admin / your-secure-password
-   ```
-
 ## Architecture
 
 PMM HA Clustered uses a two-step installation process that separates database operators from monitoring components. This separation simplifies upgrades and prevents cleanup issues when uninstalling.
@@ -153,6 +86,8 @@ PMM HA Clustered uses a two-step installation process that separates database op
 ### Architecture diagram
 
 ![HA Clustered diagram](../images/HA-diagram.jpg)
+
+
 ### Installation components
 
 **Step 1: Install Operators**
@@ -203,202 +138,269 @@ Installs monitoring infrastructure:
 
 ## Installation
 
-### Installation overview
+=== "Quickstart installation"
 
-PMM HA installation follows these steps:
-{.power-number}
+    Get PMM HA Cluster running in 10 minutes with this simplified setup. For advanced configuration options, see [full installation](#installation).
+    {.power-number}
 
-1. Add Helm repository
-2. Create namespace
-3. Install Kubernetes operators
-4. Create PMM credentials secret
-5. Install PMM HA
-6. Verify installation
+    1. Add Percona Helm repository:
+      ```sh
+      helm repo add percona https://percona.github.io/percona-helm-charts/
+      helm repo update
+      ```
 
-### Step 1: Add Percona Helm repository
-{.power-number}
+    2. Create namespace:
+      ```sh
+      kubectl create namespace pmm
+      ```
 
-1. Add the repository:
-   ```sh
-   helm repo add percona https://percona.github.io/percona-helm-charts/
-   helm repo update
-   ```
+    3. Install required Kubernetes operators:
+      ```sh
+      helm install pmm-operators percona/pmm-ha-dependencies --namespace pmm
+      
+      # Wait for all operators to be ready (typically 2-3 minutes)
+      kubectl wait --for=condition=ready pod \
+        -l app.kubernetes.io/name=victoria-metrics-operator \
+        -n pmm --timeout=300s
+      kubectl wait --for=condition=ready pod \
+        -l app.kubernetes.io/name=altinity-clickhouse-operator \
+        -n pmm --timeout=300s
+      kubectl wait --for=condition=ready pod \
+        -l app.kubernetes.io/name=pg-operator \
+        -n pmm --timeout=300s
+      ```
 
-2. Verify the repository was added:
-   ```sh
-   helm search repo percona/pmm-ha
-   ```
+    4. Create PMM secret with your passwords:
+      ```sh
+      kubectl create secret generic pmm-secret \
+        --from-literal=PMM_ADMIN_PASSWORD="your-secure-password" \
+        --from-literal=PMM_CLICKHOUSE_USER="clickhouse_pmm" \
+        --from-literal=PMM_CLICKHOUSE_PASSWORD="clickhouse-password" \
+        --from-literal=VMAGENT_remoteWrite_basicAuth_username="victoriametrics_pmm" \
+        --from-literal=VMAGENT_remoteWrite_basicAuth_password="vm-password" \
+        --from-literal=PG_PASSWORD="postgres-password" \
+        --from-literal=GF_PASSWORD="grafana-password" \
+        --namespace pmm
+      ```
 
-### Step 2: Create namespace
+    5. Install PMM HA:
+      ```sh
+      helm install pmm-ha percona/pmm-ha --namespace pmm
+      ```
 
-```sh
-kubectl create namespace pmm
-```
+    6. Wait for deployment to complete:
+      ```sh
+      kubectl wait --for=condition=ready pod \
+        -l app.kubernetes.io/name=pmm \
+        -n pmm --timeout=600s
+      ```
 
-### Step 3: Install Kubernetes operators
+    7. Access PMM UI:
+      ```sh
+      # Port-forward for local access
+      kubectl port-forward -n pmm svc/pmm-ha-haproxy 8443:443
+      
+      # Open https://localhost:8443 in your browser
+      # Login: admin / your-secure-password
+      ```
 
-Choose your installation method:
 
-=== "Recommended: Single command"
+=== "Full Installation"===
 
-    Install all three operators with one command:
-    
+    PMM HA installation follows these steps:
+    {.power-number}
+
+    1. Add Helm repository
+    2. Create namespace
+    3. Install Kubernetes operators
+    4. Create PMM credentials secret
+    5. Install PMM HA
+    6. Verify installation
+
+    ### Step 1: Add Percona Helm repository
+    {.power-number}
+
+    1. Add the repository:
+      ```sh
+      helm repo add percona https://percona.github.io/percona-helm-charts/
+      helm repo update
+      ```
+
+    2. Verify the repository was added:
+      ```sh
+      helm search repo percona/pmm-ha
+      ```
+
+    ### Step 2: Create namespace
+
     ```sh
-    helm install pmm-operators percona/pmm-ha-dependencies --namespace pmm
+    kubectl create namespace pmm
     ```
-    
-    This installs:
-    - VictoriaMetrics Operator
-    - Altinity ClickHouse Operator  
-    - Percona PostgreSQL Operator
 
-=== "Advanced: Manual installation"
+    ### Step 3: Install Kubernetes operators
 
-    Install operators separately for custom configurations:
-    
-    **VictoriaMetrics Operator:**
+    Choose your installation method:
+
+    === "Recommended: Single command"
+
+        Install all three operators with one command:
+        
+        ```sh
+        helm install pmm-operators percona/pmm-ha-dependencies --namespace pmm
+        ```
+        
+        This installs:
+        - VictoriaMetrics Operator
+        - Altinity ClickHouse Operator  
+        - Percona PostgreSQL Operator
+
+    === "Advanced: Manual installation"
+
+        Install operators separately for custom configurations:
+        
+        **VictoriaMetrics Operator:**
+        ```sh
+        helm repo add vm https://victoriametrics.github.io/helm-charts/
+        helm repo update
+        helm install victoria-metrics-operator vm/victoria-metrics-operator \
+          --namespace pmm \
+          --set admissionWebhooks.enabled=true
+        ```
+        
+        **ClickHouse Operator:**
+        ```sh
+        helm repo add altinity https://helm.altinity.com
+        helm repo update
+        helm install clickhouse-operator altinity/altinity-clickhouse-operator \
+          --namespace pmm
+        ```
+        
+        **PostgreSQL Operator:**
+        ```sh
+        helm install postgres-operator percona/pg-operator --namespace pmm
+        ```
+
+    **Wait for operators to be ready:**
+
     ```sh
-    helm repo add vm https://victoriametrics.github.io/helm-charts/
-    helm repo update
-    helm install victoria-metrics-operator vm/victoria-metrics-operator \
-      --namespace pmm \
-      --set admissionWebhooks.enabled=true
+    # VictoriaMetrics Operator
+    kubectl wait --for=condition=ready pod \
+      -l app.kubernetes.io/name=victoria-metrics-operator \
+      -n pmm --timeout=300s
+
+    # ClickHouse Operator
+    kubectl wait --for=condition=ready pod \
+      -l app.kubernetes.io/name=altinity-clickhouse-operator \
+      -n pmm --timeout=300s
+
+    # PostgreSQL Operator
+    kubectl wait --for=condition=ready pod \
+      -l app.kubernetes.io/name=pg-operator \
+      -n pmm --timeout=300s
     ```
-    
-    **ClickHouse Operator:**
+
+    ### Step 4: Create PMM credentials secret
+
+    The `secret.create` parameter is set to `false` by default in the Helm chart. You must create the `pmm-secret` manually before installing PMM HA.
+
+    This prevents Helm from overwriting your secrets during upgrades and keeps sensitive credentials out of your `values.yaml` file.
+
+    **Using kubectl (recommended):**
+
     ```sh
-    helm repo add altinity https://helm.altinity.com
-    helm repo update
-    helm install clickhouse-operator altinity/altinity-clickhouse-operator \
+    kubectl create secret generic pmm-secret \
+      --from-literal=PMM_ADMIN_PASSWORD="your-secure-password" \
+      --from-literal=PMM_CLICKHOUSE_USER="clickhouse_pmm" \
+      --from-literal=PMM_CLICKHOUSE_PASSWORD="your-clickhouse-password" \
+      --from-literal=VMAGENT_remoteWrite_basicAuth_username="victoriametrics_pmm" \
+      --from-literal=VMAGENT_remoteWrite_basicAuth_password="your-vm-password" \
+      --from-literal=PG_PASSWORD="your-postgres-password" \
+      --from-literal=GF_PASSWORD="your-grafana-password" \
       --namespace pmm
     ```
-    
-    **PostgreSQL Operator:**
-    ```sh
-    helm install postgres-operator percona/pg-operator --namespace pmm
+
+    **Using YAML file:**
+
+    Create `pmm-secret.yaml`:
+
+    ```yaml
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: pmm-secret
+      namespace: pmm
+    type: Opaque
+    stringData:
+      PMM_ADMIN_PASSWORD: "your-secure-password"
+      PMM_CLICKHOUSE_USER: "clickhouse_pmm"
+      PMM_CLICKHOUSE_PASSWORD: "your-clickhouse-password"
+      VMAGENT_remoteWrite_basicAuth_username: "victoriametrics_pmm"
+      VMAGENT_remoteWrite_basicAuth_password: "your-vm-password"
+      PG_PASSWORD: "your-postgres-password"
+      GF_PASSWORD: "your-grafana-password"
     ```
 
-**Wait for operators to be ready:**
+    Apply it:
 
-```sh
-# VictoriaMetrics Operator
-kubectl wait --for=condition=ready pod \
-  -l app.kubernetes.io/name=victoria-metrics-operator \
-  -n pmm --timeout=300s
+    ```sh
+    kubectl apply -f pmm-secret.yaml
+    ```
 
-# ClickHouse Operator
-kubectl wait --for=condition=ready pod \
-  -l app.kubernetes.io/name=altinity-clickhouse-operator \
-  -n pmm --timeout=300s
+    ### Step 5: Install PMM HA
 
-# PostgreSQL Operator
-kubectl wait --for=condition=ready pod \
-  -l app.kubernetes.io/name=pg-operator \
-  -n pmm --timeout=300s
-```
+    === "Default installation"===
 
-### Step 4: Create PMM credentials secret
+    ```sh
+    helm install pmm-ha percona/pmm-ha --namespace pmm
+    ```
 
-The `secret.create` parameter is set to `false` by default in the Helm chart. You must create the `pmm-secret` manually before installing PMM HA.
+    === "Custom configuration"===
 
-This prevents Helm from overwriting your secrets during upgrades and keeps sensitive credentials out of your `values.yaml` file.
+    Create a `values.yaml` file:
 
-**Using kubectl (recommended):**
+    ```yaml
+    # Example custom values
+    replicas: 3  # Number of PMM server replicas
 
-```sh
-kubectl create secret generic pmm-secret \
-  --from-literal=PMM_ADMIN_PASSWORD="your-secure-password" \
-  --from-literal=PMM_CLICKHOUSE_USER="clickhouse_pmm" \
-  --from-literal=PMM_CLICKHOUSE_PASSWORD="your-clickhouse-password" \
-  --from-literal=VMAGENT_remoteWrite_basicAuth_username="victoriametrics_pmm" \
-  --from-literal=VMAGENT_remoteWrite_basicAuth_password="your-vm-password" \
-  --from-literal=PG_PASSWORD="your-postgres-password" \
-  --from-literal=GF_PASSWORD="your-grafana-password" \
-  --namespace pmm
-```
+    haproxy:
+      service:
+        type: LoadBalancer  # Change to LoadBalancer for external access
 
-**Using YAML file:**
+    storage:
+      size: 100Gi  # Adjust storage size as needed
 
-Create `pmm-secret.yaml`:
+    pmmResources:
+      requests:
+        cpu: "2"
+        memory: "4Gi"
+      limits:
+        cpu: "4"
+        memory: "8Gi"
+    ```
 
-```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: pmm-secret
-  namespace: pmm
-type: Opaque
-stringData:
-  PMM_ADMIN_PASSWORD: "your-secure-password"
-  PMM_CLICKHOUSE_USER: "clickhouse_pmm"
-  PMM_CLICKHOUSE_PASSWORD: "your-clickhouse-password"
-  VMAGENT_remoteWrite_basicAuth_username: "victoriametrics_pmm"
-  VMAGENT_remoteWrite_basicAuth_password: "your-vm-password"
-  PG_PASSWORD: "your-postgres-password"
-  GF_PASSWORD: "your-grafana-password"
-```
+    Install with custom values:
 
-Apply it:
+    ```sh
+    helm install pmm-ha percona/pmm-ha --namespace pmm -f values.yaml
+    ```
 
-```sh
-kubectl apply -f pmm-secret.yaml
-```
+    ### Step 6: Verify installation
 
-### Step 5: Install PMM HA
+    ```sh
+    # Check PMM server pods
+    kubectl get pods -l app.kubernetes.io/name=pmm -n pmm
 
-=== "Default installation"===
+    # Check HAProxy pods
+    kubectl get pods -l app.kubernetes.io/name=haproxy -n pmm
 
-```sh
-helm install pmm-ha percona/pmm-ha --namespace pmm
-```
+    # Check operator-managed resources
+    kubectl get vmcluster,postgrescluster,clickhouseinstallation -n pmm
 
-=== "Custom configuration"===
-
-Create a `values.yaml` file:
-
-```yaml
-# Example custom values
-replicas: 3  # Number of PMM server replicas
-
-haproxy:
-  service:
-    type: LoadBalancer  # Change to LoadBalancer for external access
-
-storage:
-  size: 100Gi  # Adjust storage size as needed
-
-pmmResources:
-  requests:
-    cpu: "2"
-    memory: "4Gi"
-  limits:
-    cpu: "4"
-    memory: "8Gi"
-```
-
-Install with custom values:
-
-```sh
-helm install pmm-ha percona/pmm-ha --namespace pmm -f values.yaml
-```
-
-### Step 6: Verify installation
-
-```sh
-# Check PMM server pods
-kubectl get pods -l app.kubernetes.io/name=pmm -n pmm
-
-# Check HAProxy pods
-kubectl get pods -l app.kubernetes.io/name=haproxy -n pmm
-
-# Check operator-managed resources
-kubectl get vmcluster,postgrescluster,clickhouseinstallation -n pmm
-
-# Wait for all PMM pods to be ready
-kubectl wait --for=condition=ready pod \
-  -l app.kubernetes.io/name=pmm \
-  -n pmm --timeout=600s
-```
+    # Wait for all PMM pods to be ready
+    kubectl wait --for=condition=ready pod \
+      -l app.kubernetes.io/name=pmm \
+      -n pmm --timeout=600s
+    ```
 
 ## Access PMM after installation
 
@@ -437,9 +439,9 @@ PMM HA provides the following service endpoints:
 
 **Never use `monitoring-service`** - it's for internal Kubernetes cluster communication only.
 
-## Configuration options
+## Configuration PMM HA deployment
 
-### Configure External access
+### Configure external access
 
 By default, HAProxy is only accessible within the Kubernetes cluster. To enable external access, configure the HAProxy service type.
 
@@ -779,7 +781,7 @@ pmmResources:
 
 For a complete list of parameters, see the [values.yaml file](https://github.com/percona/percona-helm-charts/blob/main/charts/pmm-ha/values.yaml).
 
-### Connect PMM clients
+### Connect PMM Clients
 
 To connect a PMM client to the HA cluster, use the HAProxy service endpoint:
 
@@ -839,11 +841,13 @@ Access via: **PMM Home Dashboard > HA Badge** (top right corner)
 View detailed HA role information for all PMM nodes in the Inventory:
 {.power-number}
 
-1. Go to **Configuration > Inventory**
-2. In the **Services** tab, apply these filters:
+1. Go to **Inventory > Services** and apply these filters:
+
    - **Service Type**: `pmm-server`
    - **Service Name**: Contains `pmm-ha`
+
 3. The **Labels** column shows:
+
    - **Leader** status (which node is currently active)
    - **Follower** status (which nodes are standby)
    - **Health** status of each node
