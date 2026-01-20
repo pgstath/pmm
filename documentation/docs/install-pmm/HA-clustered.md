@@ -879,7 +879,7 @@ The badge also includes a health status indicator that reflects the overall clus
 
 The health status may not display correctly due to a [known issue](#review-known-issues) in this Tech Preview version. Verify cluster health in the **Inventory** or using `kubectl` if needed.
 
-#### View HA roles in inventory
+#### View HA roles in Inventory
 
 View detailed HA role information for all PMM nodes in the Inventory:
 {.power-number}
@@ -994,6 +994,16 @@ kubectl logs -l app.kubernetes.io/name=pmm -n pmm --tail=100
 # View HAProxy logs
 kubectl logs -l app.kubernetes.io/name=haproxy -n pmm --tail=100
 ```
+### Query HA status via API
+
+For programmatic access to cluster status and node information, PMM HA provides REST API endpoints. These endpoints let you integrate HA monitoring into automation scripts, monitoring dashboards, or alerting systems.
+
+Available endpoints:
+
+- `GET /v1/ha/status` — Check if PMM is running in HA mode
+- `GET /v1/ha/nodes` — Get cluster node information with roles and availability
+
+For complete endpoint documentation, request/response examples, and integration patterns, see the [HA status API reference](https://percona-pmm.readme.io/reference/release-notes-3-6-0).
 
 ### Upgrade PMM HA
 

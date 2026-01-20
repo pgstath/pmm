@@ -76,7 +76,7 @@ docker run -d \
 
 **Access PMM UI:**
 
-Open https://localhost in your browser and log in with default credentials:
+Open `https://localhost` in your browser and log in with default credentials:
 - Username: `admin`
 - Password: `admin` (change immediately after first login)
 
@@ -167,8 +167,8 @@ Expected output should show:
 After first login, immediately change the default admin password:
 {.power-number}
 
-1. Log in to PMM UI at https://localhost
-2. Go to **Configuration → Settings → PMM Settings**
+1. Log in to PMM UI at `https://localhost`
+2. Go to **Account > Change password**
 3. Click **Change Password**
 4. Enter current password (`admin`) and new secure password
 

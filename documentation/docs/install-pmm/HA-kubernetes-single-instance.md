@@ -207,11 +207,11 @@ pod/pmm-0   1/1   Running   0   2m
 ### Change admin password
 
 After first login, immediately change the default password:
+{.power-number}
 
-1. Log in to PMM UI
-2. Go to **Configuration → Settings → PMM Settings**
-3. Click **Change Password**
-4. Enter current password and new secure password
+1. Log in to PMM UI.
+2. Go to **Users > Change Password**.
+4. Enter current password and new secure password.
 
 Or set password via Kubernetes secret before installation:
 ```sh

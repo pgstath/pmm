@@ -218,10 +218,10 @@ nav:
               - External services monitoring:
                   - Connect external instance: install-pmm/install-pmm-client/connect-database/external.md
       - Install PMM in HA mode: 
-        - install-pmm/HA.md
-        - Docker HA (basic): install-pmm/HA-docker.md
-        - Kubernetes HA (single-instance): install-pmm/HA-kubernetes-single-instance.md
-        - Kubernetes HA (clustered): install-pmm/HA-clustered.md
+        - Compare HA options: install-pmm/HA.md
+        - Docker HA: install-pmm/HA-docker.md
+        - Kubernetes single-instance: install-pmm/HA-kubernetes-single-instance.md
+        - Kubernetes clustered: install-pmm/HA-clustered.md
 
   - Use:
       - use/using-pmm.md

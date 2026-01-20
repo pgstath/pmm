@@ -44,7 +44,7 @@ Choose the deployment option that matches your infrastructure and requirements:
 
 === "Docker HA (basic)"
 
-    **Status**: ✅ **Production-ready**
+    **Status**: **Production-ready**
 
     Simple automatic restart capabilities using Docker's built-in recovery features. Perfect for development, testing, and single-server deployments.
 
@@ -72,7 +72,7 @@ Choose the deployment option that matches your infrastructure and requirements:
 
 === "Kubernetes HA (single-instance)" 
 
-    **Status**: ✅ **Production-ready**
+    **Status**: **Production-ready**
 
     Enterprise-grade high availability through Kubernetes orchestration. Provides automatic pod rescheduling and persistent data across failures.
 
@@ -100,7 +100,7 @@ Choose the deployment option that matches your infrastructure and requirements:
 
 === "Kubernetes HA (clustered)"
 
-    **Status**: ⚠️ **Technical Preview - NOT for production**
+    **Status**: **Technical Preview - NOT for production**
 
     Zero-downtime high availability with multiple active PMM instances, distributed databases, and automatic load balancing.
 
@@ -139,5 +139,3 @@ Choose the deployment option that matches your infrastructure and requirements:
     - you need multiple active PMM instances for load distribution
     - you have expert Kubernetes skills
     - you are evaluating zero-downtime architecture for future production, or testing environments where you need to validate continuous monitoring capabilities
-
-    [View Kubernetes HA Cluster installation guide →](../install-pmm/HA-clustered.md)
