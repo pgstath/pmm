@@ -96,7 +96,7 @@ Choose the deployment option that matches your infrastructure and requirements:
     - You want automatic recovery without complexity
     - **Best choice for 90% of production deployments**
 
-    [View Kubernetes HA installation guide →](../install-pmm/HA-kubernetes-single-instance.md)
+    [View Kubernetes HA installation guide →](../install-pmm/HA-kubernetes-single-instance).
 
 === "Kubernetes HA (clustered)"
 

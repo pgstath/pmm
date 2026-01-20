@@ -218,7 +218,7 @@ Installs monitoring infrastructure:
       # Port-forward for local access
       kubectl port-forward -n pmm svc/pmm-ha-haproxy 8443:443
       
-      # Open https://localhost:8443 in your browser
+      # Open `https://localhost:8443` in your browser
       # Login: admin / your-secure-password
       ```
 
@@ -419,7 +419,7 @@ For immediate testing:
 ```sh
 kubectl port-forward -n pmm svc/pmm-ha-haproxy 8443:443
 ```
-2. Open https://localhost:8443 in your browser.
+2. Open `https://localhost:8443` in your browser.
 
 3. Log in with the default credentials:
   - Username: `admin`
@@ -539,7 +539,7 @@ By default, HAProxy is only accessible within the Kubernetes cluster. To enable 
     ```sh
     kubectl port-forward -n pmm svc/pmm-ha-haproxy 8443:443
 
-    # Access via: https://localhost:8443
+    # Access via: `https://localhost:8443`
     ```
 
 ### Apply cloud-specific configurations
@@ -862,23 +862,22 @@ kubectl get secret pg-pmm-secret -n pmm \
 
 To create additional service tokens manually, see the [PMM documentation on service accounts](https://docs.percona.com/percona-monitoring-and-management/api/authentication.html).
 
-### Monitor HA feature
+### Monitor HA features
 
 #### Identify the leader node
 
-The PMM UI displays a badge showing the current leader PMM node and cluster health status:
+PMM displays a visual badge on the [Home dashboard](../reference/dashboards/dashboard-home.md) that shows you which PMM instance is currently serving as the cluster leader and provides real-time health information about your HA deployment.
 
-- **Leader node name**: Displays which PMM instance (e.g., `pmm-ha-0`, `pmm-ha-1`, `pmm-ha-2`) is currently handling monitoring operations
-- **Health status indicators**:
+The leader badge, in the top right corner of the PMM Home Dashboard, displays the name of the active PMM instance—for example, `pmm-ha-0`, `pmm-ha-1`, or `pmm-ha-2`—that's currently handling all monitoring operations. This helps you quickly identify which server is active without needing to query the cluster directly.
 
-  - **Healthy**: All nodes in "alive" status
-  - **Degraded**: ⅓ of nodes not in "alive" status  
-  - **Critical**: ⅔ of nodes not in "alive" status
-  - **Down**: All nodes not in "alive" status
+The badge also includes a health status indicator that reflects the overall cluster state based on how many nodes are responding:
 
-Access via: **PMM Home Dashboard > HA Badge** (top right corner)
+- **Healthy** indicates all nodes are in "alive" status and functioning normally
+- **Degraded** means approximately one-third of your nodes are not responding
+- **Critical** warns that two-thirds of your nodes are unavailable
+- **Down** signals that all nodes have failed to respond
 
-**Note**: Due to a known issue (see [Known Issues](#known-issues-and-limitations)), the health status may not always display correctly in this Tech Preview release.
+The health status may not display correctly due to a [known issue](#review-known-issues) in this Tech Preview version. Verify cluster health in the **Inventory** or using `kubectl` if needed.
 
 #### View HA roles in inventory
 
