@@ -416,6 +416,7 @@ Installs monitoring infrastructure:
 ### Access via port-forward
 
 For immediate testing:
+{.power-number}
 
 1. Create a port-forward to the HAProxy service:
 ```sh
@@ -943,7 +944,7 @@ helm upgrade pmm-ha percona/pmm-ha \
 
 #### Scale database components
 
-**ClickHouse:**
+=== "ClickHouse"
 
 ```sh
 helm upgrade pmm-ha percona/pmm-ha \
@@ -951,7 +952,7 @@ helm upgrade pmm-ha percona/pmm-ha \
   --set clickhouse.cluster.replicas=5
 ```
 
-**VictoriaMetrics:**
+=== "VictoriaMetrics"
 
 ```sh
 helm upgrade pmm-ha percona/pmm-ha \
@@ -961,7 +962,7 @@ helm upgrade pmm-ha percona/pmm-ha \
   --set victoriaMetrics.vmstorage.replicaCount=5
 ```
 
-**PostgreSQL:**
+=== "PostgreSQL"
 
 PostgreSQL scaling is managed through the Percona PostgreSQL Operator. See the [Operator documentation](https://docs.percona.com/percona-operator-for-postgresql/) for details.
 
