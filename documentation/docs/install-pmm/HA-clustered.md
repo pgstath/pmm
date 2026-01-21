@@ -877,7 +877,7 @@ The badge also includes a health status indicator that reflects the overall clus
 - **Critical** warns that two-thirds of your nodes are unavailable
 - **Down** signals that all nodes have failed to respond
 
-The health status may not display correctly due to a [known issue](#review-known-issues) in this Tech Preview version. Verify cluster health in the **Inventory** or using `kubectl` if needed.
+The health status may not display correctly due to a [known issue](#known-issues) in this Tech Preview version. Verify cluster health in the **Inventory** or using `kubectl` if needed.
 
 #### View HA roles in Inventory
 
@@ -1104,7 +1104,7 @@ kubectl patch <resource-type> <resource-name> -n pmm \
   -p '{"metadata":{"finalizers":[]}}' --type=merge
 ```
 
-## Review known issues
+## Known issues
 
 We are aware of the following issues in this Tech Preview version and plan to fix them before General Availability:
 
@@ -1118,7 +1118,7 @@ We are aware of the following issues in this Tech Preview version and plan to fi
 
 [View all tracked issues →](https://perconadev.atlassian.net/issues/?jql=parent%3DPMM-14338%20and%20issuetype%3DBug%20and%20status%20not%20in%20(done%2C%20%22Pending%20Release%22)%20ORDER%20BY%20rank)
 
-### Understand scaling limitations
+### Scaling limitations
 
 !!! danger "Scaling down to single replica"
     When scaling down to a single PMM replica (from 3 to 1), ensure the **Raft leader is on pmm-0** before scaling. Kubernetes StatefulSets remove pods in reverse ordinal order (highest first).
@@ -1133,7 +1133,7 @@ We are aware of the following issues in this Tech Preview version and plan to fi
     
     Only scale down after confirming `pmm-0` is the leader.
 
-### Review VictoriaMetrics limitations
+### VictoriaMetrics limitations
 
 PMM HA Tech Preview does not support these VictoriaMetrics Enterprise features:
 
@@ -1263,4 +1263,3 @@ This Tech Preview release is designed to gather community feedback before GA. Yo
 - What's challenging or confusing?
 - What features are you missing?
 - How does performance compare to single-instance deployments?
-
