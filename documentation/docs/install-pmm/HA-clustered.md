@@ -866,6 +866,18 @@ To create additional service tokens manually, see the [PMM documentation on serv
 
 ### Monitor HA features
 
+#### Monitor cluster health
+
+Use the **PMM HA Health Overview** dashboard to monitor your entire HA deployment from a single view. 
+
+This dashboard shows real-time health status for all critical components including PMM server replicas, PostgreSQL, ClickHouse, VictoriaMetrics, and HAProxy.
+
+Access the dashboard from **All Dashboards > Browse all dashboards > Experimental > PMM HA Health Overview**.
+
+The dashboard helps you quickly identify component failures, resource constraints, and stability issues across your high-availability infrastructure. 
+
+For detailed information about each panel and what to check, see the [PMM HA Health Overview dashboard reference](../reference/dashboards/dashboard-pmm-ha-health-overview.md).
+
 #### Identify the leader node
 
 PMM displays a visual badge on the [Home dashboard](../reference/dashboards/dashboard-home.md) that shows you which PMM instance is currently serving as the cluster leader and provides real-time health information about your HA deployment.
