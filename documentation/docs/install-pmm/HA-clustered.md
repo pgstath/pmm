@@ -77,11 +77,13 @@ Before installing PMM HA, ensure your Kubernetes cluster has sufficient capacity
 
 At minimum, your cluster needs:
 
-- **CPU**: 10-20 cores
+- **CPU**: 12+ cores
 - **Memory**: 20-40 GB RAM
 - **Storage**: 100+ GB with persistent volume provisioner
 
-This baseline supports monitoring **1-10 database services** with standard retention periods. If you're planning a larger deployment, use the sizing guidelines below to calculate your resource needs.
+This baseline supports monitoring **1-10 database services** with standard retention periods. 
+
+If you're planning a larger deployment, use the sizing guidelines below to calculate your resource needs.
 
 ### Sizing guidelines
 
@@ -89,7 +91,7 @@ Use this table to estimate resources based on your monitoring scale:
 
 | Monitored services | PMM replicas | ClickHouse replicas | VictoriaMetrics storage | Total CPU | Total memory | Total storage |
 |-------------------|--------------|---------------------|------------------------|-----------|--------------|---------------|
-| 1-10 | 3 | 3 | 3 | 10 cores | 20 GB | 100 GB |
+| 1-10 | 3 | 3 | 3 | 12 cores | 20 GB | 100 GB |
 | 11-50 | 3 | 3 | 3 | 15 cores | 30 GB | 200 GB |
 | 51-100 | 3 | 3 | 5 | 20 cores | 40 GB | 500 GB |
 | 100+ | 5 | 5 | 5 | 30+ cores | 60+ GB | 1+ TB |

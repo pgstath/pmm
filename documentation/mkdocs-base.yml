@@ -578,6 +578,7 @@ nav:
               - Replication: reference/dashboards/dashboard-valkey-redis-replication.md
               - Slowlog: reference/dashboards/dashboard-valkey-redis-slowlog.md
           - HA dashboards:
+              - reference/dashboards/dashboard-ha-health-overview.md
               - reference/dashboards/dashboard-pxc-galera-node-summary.md
               - reference/dashboards/dashboard-pxc-galera-cluster-summary.md
               - reference/dashboards/dashboard-pxc-galera-cluster-summary-experimental.md
