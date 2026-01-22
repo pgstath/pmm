@@ -333,44 +333,44 @@ Installs monitoring infrastructure:
 
     === "Using kubectl (recommended)"
 
-    ```sh
-    kubectl create secret generic pmm-secret \
-      --from-literal=PMM_ADMIN_PASSWORD="your-secure-password" \
-      --from-literal=PMM_CLICKHOUSE_USER="clickhouse_pmm" \
-      --from-literal=PMM_CLICKHOUSE_PASSWORD="your-clickhouse-password" \
-      --from-literal=VMAGENT_remoteWrite_basicAuth_username="victoriametrics_pmm" \
-      --from-literal=VMAGENT_remoteWrite_basicAuth_password="your-vm-password" \
-      --from-literal=PG_PASSWORD="your-postgres-password" \
-      --from-literal=GF_PASSWORD="your-grafana-password" \
-      --namespace pmm
-    ```
+        ```sh
+        kubectl create secret generic pmm-secret \
+          --from-literal=PMM_ADMIN_PASSWORD="your-secure-password" \
+          --from-literal=PMM_CLICKHOUSE_USER="clickhouse_pmm" \
+          --from-literal=PMM_CLICKHOUSE_PASSWORD="your-clickhouse-password" \
+          --from-literal=VMAGENT_remoteWrite_basicAuth_username="victoriametrics_pmm" \
+          --from-literal=VMAGENT_remoteWrite_basicAuth_password="your-vm-password" \
+          --from-literal=PG_PASSWORD="your-postgres-password" \
+          --from-literal=GF_PASSWORD="your-grafana-password" \
+          --namespace pmm
+        ```
 
     === "Using YAML file"
 
-    Create `pmm-secret.yaml`:
+        Create `pmm-secret.yaml`:
 
-    ```yaml
-    apiVersion: v1
-    kind: Secret
-    metadata:
-      name: pmm-secret
-      namespace: pmm
-    type: Opaque
-    stringData:
-      PMM_ADMIN_PASSWORD: "your-secure-password"
-      PMM_CLICKHOUSE_USER: "clickhouse_pmm"
-      PMM_CLICKHOUSE_PASSWORD: "your-clickhouse-password"
-      VMAGENT_remoteWrite_basicAuth_username: "victoriametrics_pmm"
-      VMAGENT_remoteWrite_basicAuth_password: "your-vm-password"
-      PG_PASSWORD: "your-postgres-password"
-      GF_PASSWORD: "your-grafana-password"
-    ```
+        ```yaml
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: pmm-secret
+          namespace: pmm
+        type: Opaque
+        stringData:
+          PMM_ADMIN_PASSWORD: "your-secure-password"
+          PMM_CLICKHOUSE_USER: "clickhouse_pmm"
+          PMM_CLICKHOUSE_PASSWORD: "your-clickhouse-password"
+          VMAGENT_remoteWrite_basicAuth_username: "victoriametrics_pmm"
+          VMAGENT_remoteWrite_basicAuth_password: "your-vm-password"
+          PG_PASSWORD: "your-postgres-password"
+          GF_PASSWORD: "your-grafana-password"
+        ```
 
-    Apply it:
+        Apply it:
 
-    ```sh
-    kubectl apply -f pmm-secret.yaml
-    ```
+        ```sh
+        kubectl apply -f pmm-secret.yaml
+        ```
 
     ### Step 5: Install PMM HA
 
@@ -392,41 +392,41 @@ Installs monitoring infrastructure:
           service:
             type: LoadBalancer  # Change to LoadBalancer for external access
 
-      storage:
-        size: 100Gi  # Adjust storage size as needed
+        storage:
+          size: 100Gi  # Adjust storage size as needed
 
-      pmmResources:
-        requests:
-          cpu: "2"
-          memory: "4Gi"
-        limits:
-          cpu: "4"
-          memory: "8Gi"
-      ```
+        pmmResources:
+          requests:
+            cpu: "2"
+            memory: "4Gi"
+          limits:
+            cpu: "4"
+            memory: "8Gi"
+        ```
 
-      Install with custom values:
+        Install with custom values:
 
-      ```sh
-      helm install pmm-ha percona/pmm-ha --namespace pmm -f values.yaml
-      ```
+        ```sh
+        helm install pmm-ha percona/pmm-ha --namespace pmm -f values.yaml
+        ```
 
-      ### Step 6: Verify installation
+        ### Step 6: Verify installation
 
-      ```sh
-      # Check PMM server pods
-      kubectl get pods -l app.kubernetes.io/name=pmm -n pmm
+        ```sh
+        # Check PMM server pods
+        kubectl get pods -l app.kubernetes.io/name=pmm -n pmm
 
-      # Check HAProxy pods
-      kubectl get pods -l app.kubernetes.io/name=haproxy -n pmm
+        # Check HAProxy pods
+        kubectl get pods -l app.kubernetes.io/name=haproxy -n pmm
 
-      # Check operator-managed resources
-      kubectl get vmcluster,postgrescluster,clickhouseinstallation -n pmm
+        # Check operator-managed resources
+        kubectl get vmcluster,postgrescluster,clickhouseinstallation -n pmm
 
-      # Wait for all PMM pods to be ready
-      kubectl wait --for=condition=ready pod \
-        -l app.kubernetes.io/name=pmm \
-        -n pmm --timeout=600s
-      ```
+        # Wait for all PMM pods to be ready
+        kubectl wait --for=condition=ready pod \
+          -l app.kubernetes.io/name=pmm \
+          -n pmm --timeout=600s
+        ```
 
 ## Access PMM after installation
 
@@ -441,13 +441,13 @@ kubectl port-forward -n pmm svc/pmm-ha-haproxy 8443:443
 ```
 2. Open `https://localhost:8443` in your browser.
 
-3. Log in with the default credentials:
-  - Username: `admin`
-  - Password: Value from `PMM_ADMIN_PASSWORD` in your secret
+3. Log in with the default credentials: `admin`/value from `PMM_ADMIN_PASSWORD` in your secret.
 
 ### Use service endpoints
 
-PMM HA exposes multiple service endpoints for different purposes. For all external connections to PMM (including PMM Clients, web browsers, API calls, and Percona Operators) always use **`pmm-ha-haproxy`**. This load balancer automatically routes traffic to the active PMM leader and handles failover transparently.
+PMM HA exposes multiple service endpoints for different purposes. For all external connections to PMM (including PMM Clients, web browsers, API calls, and Percona Operators) always use **`pmm-ha-haproxy`**. 
+
+This load balancer automatically routes traffic to the active PMM leader and handles failover transparently.
 
 | Service | Description | Port | Use for |
 |---------|-------------|------|---------|
