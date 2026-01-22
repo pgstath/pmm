@@ -58,7 +58,7 @@ This solution works well for environments where brief interruptions are acceptab
 - **Memory**: 4 GB RAM
 - **Storage**: 20+ GB available disk space
 
-Storage requirements increase with the number of monitored services and data retention period. See [PMM Server system requirements](../install-pmm/install-pmm-server/deployment-options/docker/index.md#system-requirements) for detailed sizing.
+Storage requirements increase with the number of monitored services and data retention period. See [PMM Server system requirements](../install-pmm/install-pmm-server/prerequisites.md#system-requirements) for detailed sizing.
 
 ## Installation
 
@@ -69,7 +69,7 @@ Launch PMM Server with automatic restart enabled:
 docker run -d \
   --name pmm-server \
   --restart=always \
-  -p 443:443 \
+  -p 443:8443 \
   -v pmm-data:/srv \
   percona/pmm-server:3
 ```
@@ -87,7 +87,7 @@ For production environments, use additional Docker options for better security a
 docker run -d \
   --name pmm-server \
   --restart=always \
-  -p 443:443/tcp \
+  -p 443:8443/tcp \
   -p 80:80/tcp \
   -v pmm-data:/srv \
   -e DISABLE_UPDATES=true \
@@ -99,7 +99,7 @@ docker run -d \
 **Key options explained:**
 
 - `--restart=always`: Ensures automatic container restart after failures or reboots
-- `-p 443:443`: Exposes HTTPS port for secure web access
+- `-p 443:8443`: Exposes HTTPS port for secure web access
 - `-p 80:80`: Exposes HTTP port (automatically redirects to HTTPS)
 - `-v pmm-data:/srv`: Persists PMM data across container restarts
 - `-e DISABLE_UPDATES=true`: Disables automatic PMM updates (control updates manually)
@@ -117,7 +117,7 @@ services:
     container_name: pmm-server
     restart: always
     ports:
-      - "443:443"
+      - "443:8443"
       - "80:80"
     volumes:
       - pmm-data:/srv
@@ -193,7 +193,7 @@ By default, PMM Server listens on all interfaces. To restrict access:
 docker run -d \
   --name pmm-server \
   --restart=always \
-  -p 127.0.0.1:443:443 \
+  -p 127.0.0.1:443:8443 \
   -v pmm-data:/srv \
   percona/pmm-server:3
 ```
@@ -308,7 +308,7 @@ docker run --rm \
 docker run -d \
   --name pmm-server \
   --restart=always \
-  -p 443:443 \
+  -p 443:8443 \
   -v pmm-data:/srv \
   percona/pmm-server:3
 ```
@@ -328,7 +328,7 @@ docker rm pmm-server
 docker run -d \
   --name pmm-server \
   --restart=always \
-  -p 443:443 \
+  -p 443:8443 \
   -v pmm-data:/srv \
   percona/pmm-server:3
 ```
@@ -346,7 +346,7 @@ The data volume (`pmm-data`) persists all monitoring data, dashboards, and confi
 docker logs pmm-server
 
 # Common issues:
-# - Port already in use: Change port mapping (-p 8443:443)
+# - Port already in use: Change port mapping (-p 443:8443)
 # - Insufficient memory: Increase Docker memory limits
 # - Corrupted data: Remove volume and start fresh
 ```

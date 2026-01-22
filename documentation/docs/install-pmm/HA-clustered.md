@@ -3,7 +3,7 @@
 Standard PMM monitoring goes offline for minutes during server failures. PMM HA Clustered keeps monitoring running with automatic failover in under 30 seconds.
 
 !!! warning "Technical Preview: Not Production-Ready"
-    This feature is in **Technical Preview** for testing and feedback only. Expect [known issues](#known-issues-and-limitations), breaking changes, and incomplete features. 
+    This feature is in **Technical Preview** for testing and feedback only. Expect [known issues](#known-issues), breaking changes, and incomplete features. 
     
     **Test in non-production environments only** and [provide feedback](#provide-feedback) to shape the GA release.
 
@@ -19,7 +19,7 @@ Standard PMM monitoring goes offline for minutes during server failures. PMM HA 
 
 PMM HA Clustered keeps your database monitoring running continuously, even when servers fail or during maintenance windows.
 
-Unlike [single-instance deployments](HA-kubernetes-single-instance.md.md) where a server failure means minutes of monitoring downtime, PMM HA Clustered automatically switches to backup servers in under 30 seconds. 
+Unlike [single-instance deployments](HA-kubernetes-single-instance.md) where a server failure means minutes of monitoring downtime, PMM HA Clustered automatically switches to backup servers in under 30 seconds. 
 
 Whether a server crashes, you're upgrading software, or scaling your infrastructure, your monitoring stays active with no blind spots or missed incidents.
 
@@ -27,7 +27,7 @@ Whether a server crashes, you're upgrading software, or scaling your infrastruct
 
 - **Continuous monitoring**: Three PMM server replicas ensure monitoring never stops, even during failures
 - **Fast automatic failover**: Traffic switches to healthy servers in under 30 seconds with no data loss
-- **Load distribution**: HAProxy balances traffic across replicas for better performance and redundancy
+- **Automatic traffic routing**: HAProxy routes traffic to the active leader and handles failover transparently
 - **Resilient data storage**: Distributed databases (ClickHouse, VictoriaMetrics, PostgreSQL) eliminate single points of failure
 - **Scales with your needs**: Add more capacity as your database infrastructure grows
 
@@ -41,7 +41,7 @@ Whether a server crashes, you're upgrading software, or scaling your infrastruct
 | **Resource overhead** | 1x baseline | 3-5x baseline |
 | **Setup time** | ~5 minutes | ~20 minutes |
 | **PMM instances** | 1 pod | 3 pods with leader election |
-| **Load balancing** | No | Yes (HAProxy) |
+| **Automatic failover routing** | No | Yes (HAProxy routes to active leader) |
 | **Databases** | Built-in | External clusters |
 | **Anti-affinity** | No | Yes (pods distributed across nodes) |
 
@@ -62,7 +62,7 @@ PMM HA requires three Kubernetes operators to manage distributed database resour
 - **Altinity ClickHouse Operator** (v0.25.4+): Manages ClickHouse cluster for QAN data
 - **Percona PostgreSQL Operator** (v2.8.0+): Manages PostgreSQL cluster for Grafana metadata
 
-You can install these operators via the `pmm-ha-dependencies` chart (recommended) or manually. See [Installation](#installation) for details.
+You can install these operators via the `pmm-ha-dependencies` chart (recommended) or manually. See [Installation](#install-pmm-ha) for details.
 
 ### Check if your platform is supported
 
@@ -113,7 +113,7 @@ PMM HA spreads resource consumption across multiple components to ensure high av
 | Component | CPU | Memory | Storage | Notes |
 |-----------|-----|--------|---------|-------|
 | **Per PMM Server pod** | 2 cores | 4 GB | 50 GB | Storage varies with retention period |
-| **HAProxy (3 replicas)** | 1 core | 2 GB | - | Load balancer overhead |
+| **HAProxy (3 replicas)** | 1 core | 2 GB | - | Routing and failover overhead |
 | **ClickHouse cluster** | 3-6 cores | 8-12 GB | 20+ GB | Scales with QAN volume |
 | **VictoriaMetrics cluster** | 2-4 cores | 4-8 GB | 20+ GB | Scales with metrics volume |
 | **PostgreSQL cluster** | 1-2 cores | 2-4 GB | 10 GB | Grafana metadata storage |
@@ -121,9 +121,12 @@ PMM HA spreads resource consumption across multiple components to ensure high av
 
 ## Learn the architecture
 
-PMM HA Clustered uses a two-step installation process that separates database operators from monitoring components. This separation simplifies upgrades and prevents cleanup issues when uninstalling.
+The PMM HA architecture diagram below shows how components interact and communicate. 
 
-The PMM HA architecture diagram below, shows how components interact and communicate. The architecture consists of three PMM server replicas with automatic leader election, HAProxy load balancers for traffic distribution, and operator-managed database clusters (ClickHouse, VictoriaMetrics, and PostgreSQL) for resilient data storage:
+The architecture consists of:
+- three PMM server replicas with automatic leader election
+- HAProxy for routing traffic to the active leader and handling failover
+- operator-managed database clusters (ClickHouse, VictoriaMetrics, and PostgreSQL) for resilient data storage
 
 ![HA Clustered diagram](../images/HA-diagram.jpg)
 
@@ -131,12 +134,14 @@ The PMM HA architecture diagram below, shows how components interact and communi
 PMM HA uses several mechanisms to ensure continuous operation:
 
 - Leader election: PMM servers use Raft consensus protocol for leader election (ports 9096, 9097)
-- Automatic failover: HAProxy detects unhealthy PMM servers and routes to healthy ones
+- Automatic failover: HAProxy detects when the active leader becomes unhealthy and routes traffic to the new leader
 - Pod anti-affinity: Kubernetes scheduler distributes components across different nodes
 - Health checks: Comprehensive readiness and liveness probes on all components
 - Rolling updates: Zero-downtime upgrades with sequential pod updates
 
 ### Understand two-step installation
+
+PMM HA Clustered uses a two-step installation process that separates database operators from monitoring components. This separation simplifies upgrades and prevents cleanup issues when uninstalling.
 
 #### Step 1: Install operators
 
@@ -151,7 +156,7 @@ Installs Kubernetes operators to create and manage database clusters:
 Installs monitoring infrastructure:
 
 - **3 PMM monitoring servers**: Automatic leader election with Raft consensus (one active leader, two standbys)
-- **3 HAProxy load balancers**: Routes traffic to healthy servers with pod anti-affinity
+- **3 HAProxy load balancers**: Routes traffic to the active leader with automatic failover and pod  anti-affinity
 - **ClickHouse cluster**: 3 replicas with ClickHouse Keeper for Query Analytics storage (managed by Altinity ClickHouse Operator)
 - **VictoriaMetrics cluster**: Distributed metrics storage with multiple replicas (managed by VictoriaMetrics Operator)
 - **PostgreSQL cluster**: HA cluster for Grafana metadata (managed by Percona PostgreSQL Operator)
@@ -163,10 +168,14 @@ Installs monitoring infrastructure:
     Get PMM HA Cluster running in 10 minutes with this simplified setup. For advanced configuration options, see [full installation](#installation).
     {.power-number}
 
-    1. Add Percona Helm repository:
+    1. Add Percona Helm repositories:
       ```sh
       helm repo add percona https://percona.github.io/percona-helm-charts/
+      helm repo add vm https://victoriametrics.github.io/helm-charts/
+      helm repo add altinity https://docs.altinity.com/helm-charts/
       helm repo update
+      
+      helm dependency update percona/pmm-ha-dependencies
       ```
 
     2. Create namespace:
@@ -226,13 +235,17 @@ Installs monitoring infrastructure:
 
 === "Full installation"
 
-    ### Step 1: Add Percona Helm repository
+    ### Step 1: Add Percona Helm repositories:
     {.power-number}
 
-    1. Add the repository:
+    1. Add the repositories:
       ```sh
       helm repo add percona https://percona.github.io/percona-helm-charts/
+      helm repo add vm https://victoriametrics.github.io/helm-charts/
+      helm repo add altinity https://docs.altinity.com/helm-charts/
       helm repo update
+      
+      helm dependency update percona/pmm-ha-dependencies
       ```
 
     2. Verify the repository was added:
@@ -435,7 +448,7 @@ PMM HA exposes multiple service endpoints for different purposes. For all extern
 | Service | Description | Port | Use for |
 |---------|-------------|------|---------|
 | `pmm-ha-haproxy` | HAProxy load balancer with automatic failover | 443 (HTTPS) | **All external access**: PMM Clients, web browser, API calls, Percona Operators |
-| `monitoring-service` | Headless service for direct PMM pod access. **⚠️ Do not use directly** - bypasses load balancer, can cause connection failures during leader changes or maintenance | 8443 (HTTPS) | Internal cluster communication only |
+| `monitoring-service` | Headless service for direct PMM pod access. **⚠️ Do not use directly** - bypasses HAProxy, can cause connection failures during leader changes or maintenance | 8443 (HTTPS) | Internal cluster communication only |
 
 **Access database components (advanced)**
 
@@ -445,7 +458,7 @@ For direct database access or troubleshooting, PMM HA also exposes:
 |-----------|--------------|------|---------|
 | ClickHouse | `clickhouse-[release-name]` | 8123 (HTTP), 9000 (Native) | Direct QAN database access |
 | VictoriaMetrics | `vmstorage-[release-name]` | 8482 | Direct metrics storage access |
-| PostgreSQL | `[release-name]-pgha-[cluster]` | 5432 | Direct Grafana database access |
+| PostgreSQL | `[release]-pg-db-[cluster]` | 5432 | Direct Grafana database access |
 
 ## Configure PMM HA
 
@@ -811,7 +824,7 @@ pmmEnv:
 |-----------|-------------|---------|
 | `replicas` | Number of PMM server replicas | `3` |
 | `image.repository` | PMM server image repository | `percona/pmm-server` |
-| `image.tag` | PMM server image tag | `3.5.0` |
+| `image.tag` | PMM server image tag | `3.6.0` |
 | `image.pullPolicy` | Image pull policy | `IfNotPresent` |
 | `secret.create` | Create secret automatically | `false` |
 | `secret.name` | Name of the PMM secret | `pmm-secret` |
