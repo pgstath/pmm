@@ -1035,64 +1035,85 @@ Available endpoints:
 
 For complete endpoint documentation, request/response examples, and integration patterns, see the [HA status API reference](https://percona-pmm.readme.io/reference/release-notes-3-6-0).
 
-### Upgrade PMM HA
+### Modify your PMM HA deployment
 
-PMM HA uses rolling updates for zero-downtime upgrades. Each pod updates sequentially while HAProxy maintains traffic flow.
+Use Helm upgrades to modify settings like resource limits, replica counts, or storage sizes within your current PMM version. Rolling updates ensure zero downtime—each pod updates sequentially while HAProxy keeps traffic flowing to healthy nodes.
 
-=== "Standard upgrade"
+!!! warning "Version upgrades not supported"
+    This Tech Preview does not support upgrading between PMM versions. You can only modify configuration within the same version.
 
-    Upgrade to the latest PMM HA version with default settings.
+=== "Modify specific settings"
+
+    Change individual settings using command-line flags.
     {.power-number}
 
-    1. Update Helm repository:  
-       ```sh
-       helm repo update percona
-       ```
+    1. Update the setting you want to change:
+      ```sh
+       # Example: Increase PMM server replicas
+       helm upgrade pmm-ha percona/pmm-ha \
+         --namespace pmm \
+         --set replicas=5
+      ```
 
-    2. (Optional but recommended) Pre-pull new images on all nodes to avoid timeouts
+       Common modifications:
+      ```sh
+       # Increase HAProxy replicas
+       --set haproxy.replicaCount=5
+       
+       # Adjust resource limits
+       --set pmmResources.limits.cpu="8" \
+       --set pmmResources.limits.memory="16Gi"
+       
+       # Change storage size
+       --set storage.size=200Gi
+      ```
 
-    3. Upgrade PMM HA:
-       ```sh
-       helm upgrade pmm-ha percona/pmm-ha --namespace pmm
-       ```
-
-    4. Monitor the rollout:
-       ```sh
+    2. Monitor the rollout:
+    ```sh
        kubectl rollout status statefulset pmm-ha -n pmm
-       ```
+    ```
 
-=== "Upgrade with custom values"
+=== "Update with values file"
 
-    To upgrade while preserving or updating your custom configuration:
+    Modify multiple settings using a values file.
     {.power-number}
 
-    1. Update Helm repository:
-       ```sh
-       helm repo update percona
-       ```
+    1. Edit your `values.yaml` file with the changes you need:
+    ```yaml
+       replicas: 5
+       
+       haproxy:
+         replicaCount: 5
+       
+       pmmResources:
+         limits:
+           cpu: "8"
+           memory: "16Gi"
+    ```
 
-    2. (Optional but recommended) Pre-pull new images on all nodes to avoid timeouts
+    2. Apply your changes:
+    ```sh
+       helm upgrade pmm-ha percona/pmm-ha \
+         --namespace pmm \
+         -f values.yaml
+    ```
 
-    3. Upgrade with your values file:
-       ```sh
-       helm upgrade pmm-ha percona/pmm-ha --namespace pmm -f values.yaml
-       ```
-
-    4. Monitor the rollout:
-       ```sh
+    3. Monitor the rollout:
+    ```sh
        kubectl rollout status statefulset pmm-ha -n pmm
-       ```
+    ```
 
-    !!! tip "Preserving custom configuration"
-        Always use the same `values.yaml` file (or flags) that you used during installation to avoid losing custom settings during upgrades.
+    !!! tip "Keep your values file"
+        Save your `values.yaml` file for future updates. This ensures consistent configuration across modifications.
 
-#### Roll back upgrades
+#### Roll back configuration changes
 
-If an upgrade fails, rollback to the previous version:
-
+If a configuration change causes issues, rollback to the previous settings:
 ```sh
 helm rollback pmm-ha --namespace pmm
 ```
+
+This restores your previous Helm release configuration, reverting any settings changes you made.
 
 ## Troubleshoot issues
 
