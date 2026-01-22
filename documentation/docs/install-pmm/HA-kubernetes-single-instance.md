@@ -311,6 +311,7 @@ env:
 ```
 
 Common retention periods:
+
 - `168h`: 7 days (minimal storage)
 - `720h`: 30 days (recommended)
 - `2160h`: 90 days (compliance/audit)

@@ -19,7 +19,7 @@ Standard PMM monitoring goes offline for minutes during server failures. PMM HA 
 
 PMM HA Clustered keeps your database monitoring running continuously, even when servers fail or during maintenance windows.
 
-Unlike [single-instance deployments](HA-kubernetes-single-instance.md) where a server failure means minutes of monitoring downtime, PMM HA Clustered automatically switches to backup servers in under 30 seconds. 
+Unlike [single-instance deployments](../install-pmm/HA-kubernetes-single-instance.md) where a server failure means minutes of monitoring downtime, PMM HA Clustered automatically switches to backup servers in under 30 seconds. 
 
 Whether a server crashes, you're upgrading software, or scaling your infrastructure, your monitoring stays active with no blind spots or missed incidents.
 
@@ -124,6 +124,7 @@ PMM HA spreads resource consumption across multiple components to ensure high av
 The PMM HA architecture diagram below shows how components interact and communicate. 
 
 The architecture consists of:
+
 - three PMM server replicas with automatic leader election
 - HAProxy for routing traffic to the active leader and handling failover
 - operator-managed database clusters (ClickHouse, VictoriaMetrics, and PostgreSQL) for resilient data storage

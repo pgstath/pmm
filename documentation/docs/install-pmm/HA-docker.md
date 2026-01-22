@@ -77,6 +77,7 @@ docker run -d \
 **Access PMM UI:**
 
 Open `https://localhost` in your browser and log in with default credentials:
+
 - Username: `admin`
 - Password: `admin` (change immediately after first login)
 
@@ -181,6 +182,7 @@ docker exec pmm-server \
 ```
 
 Common retention periods:
+
 - `7d`: 7 days (minimal storage, short troubleshooting window)
 - `30d`: 30 days (recommended for most deployments)
 - `90d`: 90 days (compliance/audit requirements)
