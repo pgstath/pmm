@@ -923,6 +923,7 @@ View detailed role and health information for all PMM nodes in one place.
 3. Click the arrow in the **Options** column to expand the node details.
 
 4. Check the **Labels** section to see:
+
    - **Leader** status: which node is currently active
    - **Follower** status: which nodes are on standby
    - **Health** status: whether each node is responding
@@ -963,25 +964,25 @@ helm upgrade pmm-ha percona/pmm-ha \
 
 === "ClickHouse"
 
-```sh
-helm upgrade pmm-ha percona/pmm-ha \
-  --namespace pmm \
-  --set clickhouse.cluster.replicas=5
-```
+    ```sh
+    helm upgrade pmm-ha percona/pmm-ha \
+      --namespace pmm \
+      --set clickhouse.cluster.replicas=5
+    ```
 
 === "VictoriaMetrics"
 
-```sh
-helm upgrade pmm-ha percona/pmm-ha \
-  --namespace pmm \
-  --set victoriaMetrics.vmselect.replicaCount=3 \
-  --set victoriaMetrics.vminsert.replicaCount=3 \
-  --set victoriaMetrics.vmstorage.replicaCount=5
-```
+    ```sh
+    helm upgrade pmm-ha percona/pmm-ha \
+      --namespace pmm \
+      --set victoriaMetrics.vmselect.replicaCount=3 \
+      --set victoriaMetrics.vminsert.replicaCount=3 \
+      --set victoriaMetrics.vmstorage.replicaCount=5
+    ```
 
 === "PostgreSQL"
 
-PostgreSQL scaling is managed through the Percona PostgreSQL Operator. See the [Operator documentation](https://docs.percona.com/percona-operator-for-postgresql/) for details.
+    PostgreSQL scaling is managed through the Percona PostgreSQL Operator. See the [Operator documentation](https://docs.percona.com/percona-operator-for-postgresql/) for details.
 
 #### Pre-pull images before scaling
 
@@ -1050,30 +1051,30 @@ Use Helm upgrades to modify settings like resource limits, replica counts, or st
     {.power-number}
 
     1. Update the setting you want to change:
-      ```sh
-       # Example: Increase PMM server replicas
-       helm upgrade pmm-ha percona/pmm-ha \
-         --namespace pmm \
-         --set replicas=5
-      ```
+        ```sh
+        # Example: Increase PMM server replicas
+        helm upgrade pmm-ha percona/pmm-ha \
+          --namespace pmm \
+          --set replicas=5
+        ```
 
-       Common modifications:
-      ```sh
-       # Increase HAProxy replicas
-       --set haproxy.replicaCount=5
-       
-       # Adjust resource limits
-       --set pmmResources.limits.cpu="8" \
-       --set pmmResources.limits.memory="16Gi"
-       
-       # Change storage size
-       --set storage.size=200Gi
-      ```
+        Common modifications:
+        ```sh
+        # Increase HAProxy replicas
+        --set haproxy.replicaCount=5
+        
+        # Adjust resource limits
+        --set pmmResources.limits.cpu="8" \
+        --set pmmResources.limits.memory="16Gi"
+        
+        # Change storage size
+        --set storage.size=200Gi
+        ```
 
     2. Monitor the rollout:
-    ```sh
-       kubectl rollout status statefulset pmm-ha -n pmm
-    ```
+      ```sh
+        kubectl rollout status statefulset pmm-ha -n pmm
+      ```
 
 === "Update with values file"
 
@@ -1081,28 +1082,28 @@ Use Helm upgrades to modify settings like resource limits, replica counts, or st
     {.power-number}
 
     1. Edit your `values.yaml` file with the changes you need:
-    ```yaml
-       replicas: 5
-       
-       haproxy:
-         replicaCount: 5
-       
-       pmmResources:
-         limits:
-           cpu: "8"
-           memory: "16Gi"
-    ```
+      ```yaml
+        replicas: 5
+        
+        haproxy:
+          replicaCount: 5
+        
+        pmmResources:
+          limits:
+            cpu: "8"
+            memory: "16Gi"
+      ```
 
     2. Apply your changes:
-    ```sh
-       helm upgrade pmm-ha percona/pmm-ha \
-         --namespace pmm \
-         -f values.yaml
-    ```
+      ```sh
+        helm upgrade pmm-ha percona/pmm-ha \
+          --namespace pmm \
+          -f values.yaml
+      ```
 
     3. Monitor the rollout:
-    ```sh
-       kubectl rollout status statefulset pmm-ha -n pmm
+      ```sh
+        kubectl rollout status statefulset pmm-ha -n pmm
     ```
 
     !!! tip "Keep your values file"
