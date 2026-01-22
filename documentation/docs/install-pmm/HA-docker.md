@@ -89,7 +89,6 @@ docker run -d \
   --name pmm-server \
   --restart=always \
   -p 443:8443/tcp \
-  -p 80:80/tcp \
   -v pmm-data:/srv \
   -e DISABLE_UPDATES=true \
   -e DISABLE_TELEMETRY=true \
@@ -101,7 +100,6 @@ docker run -d \
 
 - `--restart=always`: Ensures automatic container restart after failures or reboots
 - `-p 443:8443`: Exposes HTTPS port for secure web access
-- `-p 80:80`: Exposes HTTP port (automatically redirects to HTTPS)
 - `-v pmm-data:/srv`: Persists PMM data across container restarts
 - `-e DISABLE_UPDATES=true`: Disables automatic PMM updates (control updates manually)
 - `--ulimit=nofile=1000000:1000000`: Increases file descriptor limit for large deployments
@@ -119,7 +117,6 @@ services:
     restart: always
     ports:
       - "443:8443"
-      - "80:80"
     volumes:
       - pmm-data:/srv
     environment:

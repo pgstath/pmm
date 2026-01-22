@@ -347,7 +347,7 @@ Installs monitoring infrastructure:
 
     === "Using YAML file"
 
-        Create `pmm-secret.yaml`:
+        1. Create `pmm-secret.yaml`:
 
         ```yaml
         apiVersion: v1
@@ -366,7 +366,7 @@ Installs monitoring infrastructure:
           GF_PASSWORD: "your-grafana-password"
         ```
 
-        Apply it:
+        2. Apply it:
 
         ```sh
         kubectl apply -f pmm-secret.yaml
@@ -382,35 +382,40 @@ Installs monitoring infrastructure:
 
     === "Custom configuration"
 
-        Create a `values.yaml` file:
+        Use custom configuration when you need to adjust resource limits, storage sizes, replica counts, or service types beyond the defaults.
+        
+        This approach gives you full control over your PMM HA deployment settings.
+        {.power-number}
 
-        ```yaml
-        # Example custom values
-        replicas: 3  # Number of PMM server replicas
+        1. Create a `values.yaml` file:
 
-        haproxy:
-          service:
-            type: LoadBalancer  # Change to LoadBalancer for external access
+          ```yaml
+          # Example custom values
+          replicas: 3  # Number of PMM server replicas
 
-        storage:
-          size: 100Gi  # Adjust storage size as needed
+          haproxy:
+            service:
+              type: LoadBalancer  # Change to LoadBalancer for external access
 
-        pmmResources:
-          requests:
-            cpu: "2"
-            memory: "4Gi"
-          limits:
-            cpu: "4"
-            memory: "8Gi"
-        ```
+          storage:
+            size: 100Gi  # Adjust storage size as needed
 
-        Install with custom values:
+          pmmResources:
+            requests:
+              cpu: "2"
+              memory: "4Gi"
+            limits:
+              cpu: "4"
+              memory: "8Gi"
+          ```
 
-        ```sh
-        helm install pmm-ha percona/pmm-ha --namespace pmm -f values.yaml
-        ```
+       2. Install with custom values:
 
-        ### Step 6: Verify installation
+          ```sh
+          helm install pmm-ha percona/pmm-ha --namespace pmm -f values.yaml
+          ```
+
+    ### Step 6: Verify installation
 
         ```sh
         # Check PMM server pods
