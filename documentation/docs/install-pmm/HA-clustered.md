@@ -896,9 +896,11 @@ For detailed information about each panel and what to check, see the [PMM HA Hea
 
 #### Identify the leader node
 
-PMM displays a visual badge on the [Home dashboard](../reference/dashboards/dashboard-home.md) that shows you which PMM instance is currently serving as the cluster leader and provides real-time health information about your HA deployment.
+PMM displays a visual badge on the side menu of the side menu and displays the name of the active PMM instance—for example, `pmm-ha-0`, `pmm-ha-1`, or `pmm-ha-2` that's currently handling all monitoring operations. 
 
-The leader badge, in the top right corner of the PMM Home Dashboard, displays the name of the active PMM instance—for example, `pmm-ha-0`, `pmm-ha-1`, or `pmm-ha-2`—that's currently handling all monitoring operations. This helps you quickly identify which server is active without needing to query the cluster directly.
+This helps you quickly identify which server is active without needing to query the cluster directly:
+
+![PMM HA Status badge](../images/HA-inventory-nodes.png)
 
 The badge also includes a health status indicator that reflects the overall cluster state based on how many nodes are responding:
 
@@ -909,23 +911,23 @@ The badge also includes a health status indicator that reflects the overall clus
 
 The health status may not display correctly due to a [known issue](#known-issues) in this Tech Preview version. Verify cluster health in the **Inventory** or using `kubectl` if needed.
 
-#### View HA roles in Inventory
+#### Check HA roles in Inventory
 
-View detailed HA role information for all PMM nodes in the Inventory:
+View detailed role and health information for all PMM nodes in one place.
 {.power-number}
 
-1. Go to **Inventory > Services** and apply these filters:
+1. Go to **Inventory > Nodes**.
 
-   - **Service Type**: `pmm-server`
-   - **Service Name**: Contains `pmm-ha`
+2. Locate nodes with names starting with `pmm-ha` (for example, `pmm-ha-0`, `pmm-ha-1`, `pmm-ha-2`).
 
-3. The **Labels** column shows:
+3. Click the arrow in the **Options** column to expand the node details.
 
-   - **Leader** status (which node is currently active)
-   - **Follower** status (which nodes are standby)
-   - **Health** status of each node
+4. Check the **Labels** section to see:
+   - **Leader** status: which node is currently active
+   - **Follower** status: which nodes are on standby
+   - **Health** status: whether each node is responding
 
-This provides a centralized view of your entire PMM HA cluster state.
+Use this view to verify your cluster state after failovers or when troubleshooting issues.
 
 ### Scale your deployment
 
@@ -990,7 +992,7 @@ PMM images can be large (several GB). Before performing upgrades or scaling oper
 kubectl get nodes
 
 # For each node, pre-pull the image (example for node1)
-kubectl debug node/node1 -it --image=percona/pmm-server:3.5.0
+kubectl debug node/node1 -it --image=percona/pmm-server:3.6.0
 ```
 
 ### Monitor cluster health
