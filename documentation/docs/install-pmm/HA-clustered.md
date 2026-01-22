@@ -51,8 +51,8 @@ Whether a server crashes, you're upgrading software, or scaling your infrastruct
 
 - **Kubernetes**: 1.22 or higher
 - **Helm**: 3.2.0 or higher
-- **kubectl**: Configured to access your cluster
-- **Persistent Volume Provisioner**: Available in your cluster
+- **kubectl**: configured to access your cluster
+- **Persistent Volume Provisioner**: available in your cluster
 
 ### Verify Kubernetes operators
 
@@ -235,8 +235,10 @@ Installs monitoring infrastructure:
       ```
 
 === "Full installation"
+    For more control over your deployment, including custom configurations, manual operator installation, and detailed verification at each stage.
 
-    ### Step 1: Add Percona Helm repositories:
+    ### Step 1: Add Percona Helm repositories
+    Add the required Helm repositories and update dependencies.
     {.power-number}
 
     1. Add the repositories:
@@ -273,6 +275,7 @@ Installs monitoring infrastructure:
         ```
         
         This installs:
+
         - VictoriaMetrics Operator
         - Altinity ClickHouse Operator  
         - Percona PostgreSQL Operator
@@ -281,7 +284,7 @@ Installs monitoring infrastructure:
 
         Install operators separately for custom configurations:
         
-        **VictoriaMetrics Operator:**
+        **VictoriaMetrics Operator**
         ```sh
         helm repo add vm https://victoriametrics.github.io/helm-charts/
         helm repo update
@@ -290,7 +293,7 @@ Installs monitoring infrastructure:
           --set admissionWebhooks.enabled=true
         ```
         
-        **ClickHouse Operator:**
+        **ClickHouse Operator**
         ```sh
         helm repo add altinity https://helm.altinity.com
         helm repo update
@@ -298,12 +301,12 @@ Installs monitoring infrastructure:
           --namespace pmm
         ```
         
-        **PostgreSQL Operator:**
+        **PostgreSQL Operator**
         ```sh
         helm install postgres-operator percona/pg-operator --namespace pmm
         ```
 
-    **Wait for operators to be ready:**
+    **Wait for operators to be ready**
 
     ```sh
     # VictoriaMetrics Operator
@@ -328,7 +331,7 @@ Installs monitoring infrastructure:
 
     This prevents Helm from overwriting your secrets during upgrades and keeps sensitive credentials out of your `values.yaml` file.
 
-    **Using kubectl (recommended):**
+    === "Using kubectl (recommended)"
 
     ```sh
     kubectl create secret generic pmm-secret \
@@ -342,7 +345,7 @@ Installs monitoring infrastructure:
       --namespace pmm
     ```
 
-    **Using YAML file:**
+    === "Using YAML file"
 
     Create `pmm-secret.yaml`:
 
@@ -373,57 +376,57 @@ Installs monitoring infrastructure:
 
     === "Default installation"
 
-    ```sh
-    helm install pmm-ha percona/pmm-ha --namespace pmm
-    ```
+        ```sh
+        helm install pmm-ha percona/pmm-ha --namespace pmm
+        ```
 
     === "Custom configuration"
 
-    Create a `values.yaml` file:
+        Create a `values.yaml` file:
 
-    ```yaml
-    # Example custom values
-    replicas: 3  # Number of PMM server replicas
+        ```yaml
+        # Example custom values
+        replicas: 3  # Number of PMM server replicas
 
-    haproxy:
-      service:
-        type: LoadBalancer  # Change to LoadBalancer for external access
+        haproxy:
+          service:
+            type: LoadBalancer  # Change to LoadBalancer for external access
 
-    storage:
-      size: 100Gi  # Adjust storage size as needed
+      storage:
+        size: 100Gi  # Adjust storage size as needed
 
-    pmmResources:
-      requests:
-        cpu: "2"
-        memory: "4Gi"
-      limits:
-        cpu: "4"
-        memory: "8Gi"
-    ```
+      pmmResources:
+        requests:
+          cpu: "2"
+          memory: "4Gi"
+        limits:
+          cpu: "4"
+          memory: "8Gi"
+      ```
 
-    Install with custom values:
+      Install with custom values:
 
-    ```sh
-    helm install pmm-ha percona/pmm-ha --namespace pmm -f values.yaml
-    ```
+      ```sh
+      helm install pmm-ha percona/pmm-ha --namespace pmm -f values.yaml
+      ```
 
-    ### Step 6: Verify installation
+      ### Step 6: Verify installation
 
-    ```sh
-    # Check PMM server pods
-    kubectl get pods -l app.kubernetes.io/name=pmm -n pmm
+      ```sh
+      # Check PMM server pods
+      kubectl get pods -l app.kubernetes.io/name=pmm -n pmm
 
-    # Check HAProxy pods
-    kubectl get pods -l app.kubernetes.io/name=haproxy -n pmm
+      # Check HAProxy pods
+      kubectl get pods -l app.kubernetes.io/name=haproxy -n pmm
 
-    # Check operator-managed resources
-    kubectl get vmcluster,postgrescluster,clickhouseinstallation -n pmm
+      # Check operator-managed resources
+      kubectl get vmcluster,postgrescluster,clickhouseinstallation -n pmm
 
-    # Wait for all PMM pods to be ready
-    kubectl wait --for=condition=ready pod \
-      -l app.kubernetes.io/name=pmm \
-      -n pmm --timeout=600s
-    ```
+      # Wait for all PMM pods to be ready
+      kubectl wait --for=condition=ready pod \
+        -l app.kubernetes.io/name=pmm \
+        -n pmm --timeout=600s
+      ```
 
 ## Access PMM after installation
 
@@ -473,7 +476,7 @@ By default, HAProxy is only accessible within the Kubernetes cluster. To enable 
 
     The LoadBalancer service type automatically provisions a cloud load balancer with a public IP/DNS.
 
-    **Configuration:**
+    **Configuration**
     ```yaml
     # values.yaml
     haproxy:
@@ -481,14 +484,14 @@ By default, HAProxy is only accessible within the Kubernetes cluster. To enable 
         type: LoadBalancer
     ```
 
-    **Apply the configuration:**
+    **Apply the configuration**
     ```sh
     helm upgrade pmm-ha percona/pmm-ha \
       --namespace pmm \
       --set haproxy.service.type=LoadBalancer
     ```
 
-    **Get the external endpoint:**
+    **Get the external endpoint**
     ```sh
     kubectl get svc pmm-ha-haproxy -n pmm
 
@@ -502,7 +505,7 @@ By default, HAProxy is only accessible within the Kubernetes cluster. To enable 
 
     NodePort exposes PMM on a static port on each cluster node.
 
-    **Configuration:**
+    **Configuration**
     ```yaml
     # values.yaml
     haproxy:
@@ -510,14 +513,14 @@ By default, HAProxy is only accessible within the Kubernetes cluster. To enable 
         type: NodePort
     ```
 
-    **Apply the configuration:**
+    **Apply the configuration**
     ```sh
     helm upgrade pmm-ha percona/pmm-ha \
       --namespace pmm \
       --set haproxy.service.type=NodePort
     ```
 
-    **Get the assigned port:**
+    **Get the assigned port**
     ```sh
     # Get the NodePort number
     kubectl get svc pmm-ha-haproxy -n pmm \
@@ -538,7 +541,7 @@ By default, HAProxy is only accessible within the Kubernetes cluster. To enable 
 
     ClusterIP makes PMM accessible only within the Kubernetes cluster. This is the default setting.
 
-    **Configuration:**
+    **Configuration**
     ```yaml
     # values.yaml
     haproxy:
@@ -546,13 +549,13 @@ By default, HAProxy is only accessible within the Kubernetes cluster. To enable 
         type: ClusterIP
     ```
 
-    **Access from within the cluster:**
+    **Access from within the cluster**
     ```sh
     # From any pod in the cluster
     curl https://pmm-ha-haproxy.pmm.svc.cluster.local:443
     ```
 
-    **Port-forward for local testing:**
+    **Port-forward for local testing**
     ```sh
     kubectl port-forward -n pmm svc/pmm-ha-haproxy 8443:443
 
@@ -582,7 +585,7 @@ Configure LoadBalancer settings optimized for your cloud provider:
           # service.beta.kubernetes.io/aws-load-balancer-eip-allocations: "eipalloc-xxx,eipalloc-yyy"
     ```
 
-    **Apply the configuration:**
+    **Apply the configuration**
     ```sh
     helm upgrade pmm-ha percona/pmm-ha --namespace pmm -f values.yaml
     ```
@@ -607,7 +610,7 @@ Configure LoadBalancer settings optimized for your cloud provider:
           networking.gke.io/load-balancer-type: "Internal"
     ```
 
-    **Create a static IP (optional):**
+    **Create a static IP (optional)**
     ```sh
     # Reserve a static IP address
     gcloud compute addresses create pmm-ip --region=us-central1
@@ -618,7 +621,7 @@ Configure LoadBalancer settings optimized for your cloud provider:
       --format="value(address)"
     ```
 
-    **Apply the configuration:**
+    **Apply the configuration**
     ```sh
     helm upgrade pmm-ha percona/pmm-ha --namespace pmm -f values.yaml
     ```
@@ -643,7 +646,7 @@ Configure LoadBalancer settings optimized for your cloud provider:
           service.beta.kubernetes.io/azure-load-balancer-internal: "true"
     ```
 
-    **Create a static IP (optional):**
+    **Create a static IP (optional)**
     ```sh
     # Create a static public IP in the same resource group as your AKS cluster
     az network public-ip create \
@@ -660,7 +663,7 @@ Configure LoadBalancer settings optimized for your cloud provider:
       --output tsv
     ```
 
-    **Apply the configuration:**
+    **Apply the configuration**
     ```sh
     helm upgrade pmm-ha percona/pmm-ha --namespace pmm -f values.yaml
     ```
@@ -683,7 +686,7 @@ Configure LoadBalancer settings optimized for your cloud provider:
           metallb.universe.tf/address-pool: "production-pool"
     ```
 
-    **Prerequisites:**
+    **Prerequisites**
 
     - Install MetalLB in your cluster:
        ```sh
@@ -702,7 +705,7 @@ Configure LoadBalancer settings optimized for your cloud provider:
          - 192.168.1.100-192.168.1.110
        ```
 
-    **Apply the configuration:**
+    **Apply the configuration**
     ```sh
     helm upgrade pmm-ha percona/pmm-ha --namespace pmm -f values.yaml
     ```
@@ -786,7 +789,7 @@ pmmResources:
 
 PMM HA uses environment variables to control its behavior. The HA-specific variables are pre-configured for optimal cluster operation, while data retention and other settings can be customized to match your requirements.
 
-**Pre-configured HA variables:**
+**Pre-configured HA variables**
 
 These variables are automatically set and manage critical cluster functions like leader election, gossip communication, and database integration:
 
@@ -804,7 +807,7 @@ pmmEnv:
 
 These variables are tested and validated for the HA architecture - modifying them is not recommended. PMM updates are managed through Helm chart upgrades rather than the UI to ensure consistency across all replicas.
 
-**Customizable settings:**
+**Customizable settings**
 
 Adjust these variables in your `values.yaml` to match your monitoring requirements:
 
@@ -814,7 +817,7 @@ pmmEnv:
   # Add other environment variables as needed
 ```
 
-**Common customizations:**
+**Common customizations**
 
 - **Data retention**: Set `DATA_RETENTION` based on your compliance requirements and storage capacity (e.g., `720h` for 30 days, `4320h` for 180 days)
 - **Additional variables**: See [PMM environment variables documentation](https://docs.percona.com/percona-monitoring-and-management/setting-up/server/docker.html#environment-variables) for all available options
@@ -860,13 +863,11 @@ pmm-admin config \
 
 ### Enable automatic PostgreSQL monitoring
 
-When `pg-db.pmm.enabled: true` (default), PostgreSQL metrics are automatically pushed to PMM:
+When `pg-db.pmm.enabled: true` (the default setting), PostgreSQL metrics are automatically pushed to PMM without any manual configuration.
 
-- A **service account token** is automatically created in PMM by the `pmm-token-init` Job
-- The token is stored in the `pg-pmm-secret` Kubernetes secret
-- PostgreSQL pods use this token to authenticate and push metrics to PMM via the `pmm-ha-haproxy` endpoint
+During installation, the `pmm-token-init` job creates a service account token in PMM and stores it in the `pg-pmm-secret` Kubernetes secret. PostgreSQL pods then use this token to authenticate and push metrics to PMM through the `pmm-ha-haproxy` endpoint.
 
-**No manual configuration required** - the Percona PostgreSQL Operator handles the integration automatically.
+The Percona PostgreSQL Operator handles this entire integration automatically.
 
 ### Manage service tokens
 
@@ -941,7 +942,7 @@ helm upgrade pmm-ha percona/pmm-ha \
 !!! warning "Important behavior"
     When you scale PMM HA up or down, **all PMM pods will be recreated**. This happens because the `PMM_HA_PEERS` environment variable is dynamically generated based on replica count and must be updated on all pods.
     
-    **Impact:**
+    **Impact**
     
     - Brief service interruption during pod recreation (typically < 1 minute per pod)
     - HAProxy continues routing to available pods during rollout
@@ -1215,13 +1216,13 @@ kubectl get vmcluster,postgrescluster,clickhouseinstallation -n pmm
 
 Based on how you installed the operators:
 
-**If installed via pmm-ha-dependencies chart:**
+**If installed via pmm-ha-dependencies chart**
 
 ```sh
 helm uninstall pmm-operators --namespace pmm
 ```
 
-**If installed manually:**
+**If installed manually**
 
 ```sh
 helm uninstall victoria-metrics-operator --namespace pmm
