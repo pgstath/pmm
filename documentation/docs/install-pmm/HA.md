@@ -44,24 +44,24 @@ Choose the deployment option that matches your infrastructure and requirements:
 
 === "Docker HA (basic)"
 
-    **Status**: **Production-ready**
+    **Status** **Production-ready**
 
     Simple automatic restart capabilities using Docker's built-in recovery features. Perfect for development, testing, and single-server deployments.
 
-    **Key features**:
+    **Key features**
     
     - Docker automatically restarts PMM Server after crashes
     - PMM Clients buffer metrics locally during outages
     - Minimal operational overhead
     - No Kubernetes required
 
-    **Limitations**:
+    **Limitations**
     
     - 1-3 minutes downtime during container restarts
     - Single point of failure
     - Manual intervention required for host-level failures
 
-    **When to use this option**:
+    **When to use this option**
     
     - You're in development or testing
     - You don't have Kubernetes
@@ -72,66 +72,66 @@ Choose the deployment option that matches your infrastructure and requirements:
 
 === "Kubernetes HA (single-instance)" 
 
-    **Status**: **Production-ready**
+    **Status** **Production-ready**
 
     Enterprise-grade high availability through Kubernetes orchestration. Provides automatic pod rescheduling and persistent data across failures.
 
-    **Key features**:
+    **Key features**
     
     - Kubernetes automatically reschedules failed pods to healthy nodes
     - Persistent volumes preserve all data and configurations
     - Health probes ensure only healthy instances receive traffic
     - Production-tested and stable
 
-    **Limitations**:
+    **Limitations**
     
     - 2-5 minutes monitoring interruption during pod rescheduling
     - Single PMM instance (no load distribution)
 
-    **When to use this option**:
+    **When to use this option**
     
     - You have Kubernetes infrastructure
     - You need production-ready HA
     - You can tolerate 2-5 minutes of downtime
     - You want automatic recovery without complexity
-    - **Best choice for 90% of production deployments**
+    - ****choice for 90% of production deployments
 
     [View Kubernetes HA installation guide →](../install-pmm/HA-kubernetes-single-instance).
 
 === "Kubernetes HA (clustered)"
 
-    **Status**: **Technical Preview - NOT for production**
+    **Status** **Technical Preview - NOT for production**
 
     Zero-downtime high availability with multiple active PMM instances, distributed databases, and automatic load balancing.
 
     !!! warning "Technical Preview"
         This deployment option is in **Technical Preview** and should **NOT be used in production environments**. It is provided for testing and feedback purposes only.
 
-    **Key features**:
+    **Key features**
     
     - Zero-downtime failover (< 30 seconds)
     - 3 PMM server replicas with leader election
     - HAProxy load balancing
     - Distributed ClickHouse, VictoriaMetrics, and PostgreSQL clusters
 
-    **What makes it different**:
+    **What makes it different**
     
-    - **No monitoring blind spots**: Unlike single-instance (2-5 min gaps), clustered maintains continuous visibility
-    - **Multiple active instances**: Load distribution and instant failover to followers
-    - **Horizontal scalability**: Add replicas as monitoring load grows
+    - **No monitoring blind spots**: unlike single-instance (2-5 min gaps), clustered maintains continuous visibility
+    - **Multiple active instances**: load distribution and instant failover to followers
+    - **Horizontal scalability**: add replicas as monitoring load grows
     - **True zero-downtime**: Traffic redirects to healthy instances in < 30 seconds
 
-    **Known limitations**:
+    **Known limitations**
     
     - NOT production-ready as it has known bugs
-    - Complex setup requiring 3 Kubernetes operators
+    - complex setup requiring 3 Kubernetes operators
     - 3x resource overhead minimum
-    - Subject to breaking changes
-    - Node selection shows incorrect PostgreSQL instances
-    - Services added via pmm-admin don't show dashboard data
+    - subject to breaking changes
+    - node selection shows incorrect PostgreSQL instances
+    - services added via pmm-admin don't show dashboard data
     - PostgreSQL monitoring may show incorrect FAILED status
 
-    **When to use this option**:
+    **When to use this option**
     
     - you understand this is NOT production-ready
     - you need continuous monitoring visibility (no 2-5 min gaps)
