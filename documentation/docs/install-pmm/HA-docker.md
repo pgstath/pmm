@@ -45,26 +45,24 @@ This solution works well for environments where brief interruptions are acceptab
 
 ## Prerequisites
 
-### Required software
-
-- **Docker**: 20.10 or higher
-- **Docker Compose** (optional): 2.0 or higher for easier management
-
-### System requirements
-
-**Minimum resources:**
-
-- **CPU**: 2 cores
-- **Memory**: 4 GB RAM
-- **Storage**: 20+ GB available disk space
-
 Storage requirements increase with the number of monitored services and data retention period. See [PMM Server system requirements](../install-pmm/install-pmm-server/prerequisites.md#system-requirements) for detailed sizing.
+
+=== "Required software"
+
+    - **Docker**: 20.10 or higher
+    - **Docker Compose** (optional): 2.0 or higher for easier management
+
+=== "System requirements"
+
+    **Minimum resources:**
+
+    - **CPU**: 2 cores
+    - **Memory**: 4 GB RAM
+    - **Storage**: 20+ GB available disk space
 
 ## Installation
 
-### Quick start
-
-Launch PMM Server with automatic restart enabled:
+1. Launch PMM Server with automatic restart enabled:
 ```sh
 docker run -d \
   --name pmm-server \
@@ -74,12 +72,9 @@ docker run -d \
   percona/pmm-server:3
 ```
 
-**Access PMM UI:**
+2. Access PMM UI:**
 
-Open `https://localhost` in your browser and log in with default credentials:
-
-- Username: `admin`
-- Password: `admin` (change immediately after first login)
+Open `https://localhost` in your browser and log in with default credentials: `admin`/`admin` (change immediately after first login)
 
 ### Recommended production setup
 
@@ -273,7 +268,7 @@ docker exec pmm-server supervisorctl status
 
 ### Backup and restore
 
-**Create backup:**
+#### Create backup
 ```sh
 # Stop PMM Server to ensure consistent backup
 docker stop pmm-server
@@ -288,7 +283,7 @@ docker run --rm \
 docker start pmm-server
 ```
 
-**Restore from backup:**
+#### Restore from backup
 ```sh
 # Stop and remove existing container
 docker stop pmm-server
@@ -405,21 +400,21 @@ docker inspect pmm-server | grep -A 5 Mounts
 
 ### When to consider Kubernetes HA
 
-Consider upgrading to [Kubernetes HA Single-Instance](HA-kubernetes-single-instance.md) when:
+Consider upgrading to [Kubernetes HA Single-Instance](HA-kubernetes-single-instance.md) when you:
 
-- You need automatic recovery from host-level failures
-- You're already using Kubernetes for other infrastructure
-- You want automated pod rescheduling across nodes
-- You need better resource management and scheduling
+- need automatic recovery from host-level failures
+- are already using Kubernetes for other infrastructure
+- want automated pod rescheduling across nodes
+- need better resource management and scheduling
 
 ### When to consider Kubernetes HA Clustered
 
-Consider [Kubernetes HA Clustered](HA-clustered.md) when:
+Consider [Kubernetes HA Clustered](HA-clustered.md) when you:
 
-- You require zero-downtime monitoring (< 30 second failover)
-- You can tolerate Tech Preview status and known issues
-- You have expert Kubernetes skills
-- You're testing for future production HA requirements
+- require zero-downtime monitoring (< 30 second failover)
+- can tolerate Tech Preview status and known issues
+- have expert Kubernetes skills
+- test for future production HA requirements
 
 ## Get help
 

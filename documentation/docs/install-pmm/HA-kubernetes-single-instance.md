@@ -20,30 +20,11 @@ Kubernetes HA Single-Instance leverages Kubernetes' native pod management and se
 
 ### How it works
 
-When you deploy PMM on Kubernetes with a StatefulSet and PersistentVolumeClaim, Kubernetes continuously monitors and manages the deployment:
+Kubernetes watches your PMM deployment and fixes problems automatically. 
 
-**Normal operation:**
-- Kubernetes runs one PMM pod on a selected node
-- Persistent volume stores all monitoring data
-- Health probes verify PMM is responding correctly
-- PMM Clients send metrics to the pod
+If a pod crashes or a node fails, Kubernetes restarts it on a healthy node within a few minutes.
 
-**When failures occur**, Kubernetes automatically:
-
-- Detects pod or node failures through health checks (within 30 seconds)
-- Marks failed resources as unavailable
-- Reschedules the PMM pod to a healthy node
-- Mounts the existing persistent volume to restore state
-- Routes traffic once readiness checks pass
-
-During failover (typically 2-5 minutes), data integrity is maintained through:
-
-- PMM Client-side caching of up to 24 hours of metrics
-- PersistentVolumeClaims that retain all historical data
-- Automatic metric synchronization once connection restores
-- Preservation of all configurations and custom dashboards
-
-**Typical recovery time**: 2-5 minutes
+ Your persistent volume keeps all your data safe—it stays attached when the pod moves. Your PMM Clients cache metrics locally, so nothing gets lost during the restart. Once PMM comes back up, everything syncs automatically.
 
 ### Limitations
 
@@ -55,30 +36,30 @@ During failover (typically 2-5 minutes), data integrity is maintained through:
 This solution works well for production environments that can tolerate brief monitoring interruptions during automatic failover. The trade-off between operational simplicity and high availability makes it ideal for most production workloads.
 
 ## Prerequisites
-
-### Required software
-
-- **Kubernetes**: 1.21 or higher
-- **Helm**: 3.2.0 or higher
-- **kubectl**: Configured to access your cluster
-- **Persistent Volume Provisioner**: Available in your cluster (e.g., AWS EBS, GCE PD, Azure Disk)
-
-### Cluster requirements
-
-**Minimum cluster resources:**
-
-- **CPU**: 2 cores available
-- **Memory**: 4 GB RAM available
-- **Storage**: 20+ GB persistent volume
-
-**Recommended for production:**
-
-- **CPU**: 4+ cores
-- **Memory**: 8+ GB RAM
-- **Storage**: 100+ GB with fast SSD-backed persistent volumes
-- **Multiple nodes**: At least 2 worker nodes for automatic rescheduling
-
 Storage requirements scale with the number of monitored services and data retention period.
+
+=== "Required software"
+
+    - **Kubernetes**: 1.21 or higher
+    - **Helm**: 3.2.0 or higher
+    - **kubectl**: Configured to access your cluster
+    - **Persistent Volume Provisioner**: Available in your cluster (e.g., AWS EBS, GCE PD, Azure Disk)
+
+=== "Cluster requirements"
+
+    Minimum cluster resources:
+
+    - **CPU**: 2 cores available
+    - **Memory**: 4 GB RAM available
+    - **Storage**: 20+ GB persistent volume
+
+=== "Recommended for production"
+
+    - **CPU**: 4+ cores
+    - **Memory**: 8+ GB RAM
+    - **Storage**: 100+ GB with fast SSD-backed persistent volumes
+    - **Multiple nodes**: At least 2 worker nodes for automatic rescheduling
+
 
 ### Verify prerequisites
 
@@ -679,25 +660,25 @@ kubectl describe pod -n monitoring -l app=pmm
 
 ### When to consider Kubernetes HA Clustered
 
-Consider upgrading to [Kubernetes HA Clustered](HA-clustered.md) when:
-
-- You require **zero-downtime monitoring** (< 30 second failover)
-- You can tolerate **Tech Preview status** with known issues
-- You have **expert Kubernetes skills** to manage complex deployments
-- You need **multiple active PMM instances** for load distribution
-- You're **testing for future production** HA requirements
-
 !!! warning "HA Clustered is Tech Preview only"
     Kubernetes HA Clustered is currently NOT production-ready. Only consider it for testing and evaluation purposes.
+
+Consider upgrading to [Kubernetes HA Clustered](HA-clustered.md) when you:
+
+- require **zero-downtime monitoring** (< 30 second failover)
+- can tolerate **Tech Preview status** with known issues
+- have **expert Kubernetes skills** to manage complex deployments
+- need **multiple active PMM instances** for load distribution
+- are **testing for future production** HA requirements
 
 ### When to stay with Docker HA
 
 Consider using [Docker HA](HA-docker.md) instead if:
 
-- You don't have Kubernetes infrastructure
-- You want the simplest possible setup
-- You're in development or testing
-- You can tolerate 1-3 minutes of downtime
+- don't have Kubernetes infrastructure
+- want the simplest possible setup
+- are in development or testing
+- can tolerate 1-3 minutes of downtime
 
 
 ## Get help
@@ -706,6 +687,5 @@ Consider using [Docker HA](HA-docker.md) instead if:
 - [Contact Percona Support](https://www.percona.com/services/support) for enterprise-level help with production issues.
  for enterprise-level help with production issues.
 - Report bugs or technical issues through the [PMM JIRA Issue Tracker](https://perconadev.atlassian.net/jira/software/c/projects/PMM/issues/)
-- [PMM Documentation](https://docs.percona.com/percona-monitoring-and-management/)
 - [Helm chart documentation](https://github.com/percona/percona-helm-charts/tree/main/charts/pmm)
 - [Kubernetes best practices for PMM](../install-pmm/install-pmm-server/deployment-options/helm/index.md)

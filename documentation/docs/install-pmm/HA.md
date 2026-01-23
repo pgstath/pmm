@@ -68,7 +68,9 @@ Choose the deployment option that matches your infrastructure and requirements:
     - You want the simplest setup
     - You can tolerate 1-3 minutes of downtime
 
-    [View Docker HA installation guide →](../install-pmm/HA-docker.md)
+    ## Next step
+    
+    [View Docker HA installation guide](../install-pmm/HA-docker.md){.md-button} 
 
 === "Kubernetes HA (single-instance)" 
 

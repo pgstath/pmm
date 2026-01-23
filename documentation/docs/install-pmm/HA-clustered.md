@@ -2,26 +2,20 @@
 
 Standard PMM monitoring goes offline for minutes during server failures. PMM HA Clustered keeps monitoring running with automatic failover in under 30 seconds.
 
-!!! warning "Technical Preview: Not Production-Ready"
-    This feature is in **Technical Preview** for testing and feedback only. Expect [known issues](#known-issues), breaking changes, and incomplete features. 
-    
-    **Test in non-production environments only** and [provide feedback](#provide-feedback) to shape the GA release.
-
-!!! danger "VictoriaMetrics limitations"
-    This Tech Preview does not support:
-    
-    - **Prometheus data imports**: Cannot import existing Prometheus files
-    - **Metrics downsampling**: No automatic historical data optimization
-    
-    If your strategy requires these features, evaluate carefully before testing.
-
-## Understand PMM HA Clustered
-
 PMM HA Clustered keeps your database monitoring running continuously, even when servers fail or during maintenance windows.
 
 Unlike [single-instance deployments](../install-pmm/HA-kubernetes-single-instance.md) where a server failure means minutes of monitoring downtime, PMM HA Clustered automatically switches to backup servers in under 30 seconds. 
 
 Whether a server crashes, you're upgrading software, or scaling your infrastructure, your monitoring stays active with no blind spots or missed incidents.
+
+!!! warning "Technical Preview: Not Production-Ready"
+    This feature is in **Technical Preview** for testing and feedback only. It's not production-ready and has [known issues](#known-issues) and limitations:  
+
+      - Cannot import existing Prometheus data files
+      - No automatic metrics downsampling for historical data
+
+    Expect breaking changes before GA release. Test in non-production environments only and [provide feedback](#provide-feedback) to help shape the final release.
+    ## Understand PMM HA Clustered
 
 ### Key benefits
 
@@ -100,11 +94,11 @@ Use this table to estimate resources based on your monitoring scale:
 
 Your actual resource needs may vary based on:
 
-- Number of monitored database instances
-- Metrics resolution and retention period
+- number of monitored database instances
+- metrics resolution and retention period
 - Query Analytics (QAN) volume
-- Number of concurrent users
-- Custom dashboards and queries
+- number of concurrent users
+- custom dashboards and queries
 
 ### Understand how resources are distributed
 
@@ -134,11 +128,11 @@ The architecture consists of:
 ### Learn high availability mechanisms
 PMM HA uses several mechanisms to ensure continuous operation:
 
-- Leader election: PMM servers use Raft consensus protocol for leader election (ports 9096, 9097)
-- Automatic failover: HAProxy detects when the active leader becomes unhealthy and routes traffic to the new leader
-- Pod anti-affinity: Kubernetes scheduler distributes components across different nodes
-- Health checks: Comprehensive readiness and liveness probes on all components
-- Rolling updates: Zero-downtime upgrades with sequential pod updates
+- **Leader election**: PMM servers use Raft consensus protocol for leader election (ports 9096, 9097)
+- **Automatic failover**: HAProxy detects when the active leader becomes unhealthy and routes traffic to the new leader
+- **Pod anti-affinity**: Kubernetes scheduler distributes components across different nodes
+- **Health checks**: Comprehensive readiness and liveness probes on all components
+- **Rolling updates**: Zero-downtime upgrades with sequential pod updates
 
 ### Understand two-step installation
 
@@ -166,7 +160,7 @@ Installs monitoring infrastructure:
 
 === "Quickstart installation"
 
-    Get PMM HA Cluster running in 10 minutes with this simplified setup. For advanced configuration options, see [full installation](#installation).
+    Get PMM HA Cluster running in 10 minutes with this simplified setup. For advanced configuration options, use the full installation option.
     {.power-number}
 
     1. Add Percona Helm repositories:
@@ -263,25 +257,26 @@ Installs monitoring infrastructure:
     ```
 
     ### Step 3: Install Kubernetes operators
+    PMM needs three operators to run on Kubernetes. You can install all of them with one command, or install them separately if you need custom configurations:
+    {.power-number}
 
-    Choose your installation method:
+    1. Choose your installation method:
 
     === "Recommended: Single command"
-
+        
         Install all three operators with one command:
         
         ```sh
         helm install pmm-operators percona/pmm-ha-dependencies --namespace pmm
         ```
         
-        This installs:
+        this installs:
 
         - VictoriaMetrics Operator
         - Altinity ClickHouse Operator  
         - Percona PostgreSQL Operator
 
     === "Advanced: Manual installation"
-
         Install operators separately for custom configurations:
         
         **VictoriaMetrics Operator**
@@ -306,7 +301,7 @@ Installs monitoring infrastructure:
         helm install postgres-operator percona/pg-operator --namespace pmm
         ```
 
-    **Wait for operators to be ready**
+    2. Wait for operators to be ready:
 
     ```sh
     # VictoriaMetrics Operator
@@ -346,6 +341,8 @@ Installs monitoring infrastructure:
         ```
 
     === "Using YAML file"
+        If you prefer to manage the secret as a file, create pmm-secret.yaml:
+        {.power-number}
 
         1. Create `pmm-secret.yaml`:
 
@@ -409,29 +406,29 @@ Installs monitoring infrastructure:
               memory: "8Gi"
           ```
 
-       2. Install with custom values:
+          2. Install with custom values:
 
-          ```sh
-          helm install pmm-ha percona/pmm-ha --namespace pmm -f values.yaml
-          ```
+              ```sh
+              helm install pmm-ha percona/pmm-ha --namespace pmm -f values.yaml
+              ```
 
     ### Step 6: Verify installation
+    
+    ```sh
+      # Check PMM server pods
+      kubectl get pods -l app.kubernetes.io/name=pmm -n pmm
 
-        ```sh
-        # Check PMM server pods
-        kubectl get pods -l app.kubernetes.io/name=pmm -n pmm
+      # Check HAProxy pods
+      kubectl get pods -l app.kubernetes.io/name=haproxy -n pmm
 
-        # Check HAProxy pods
-        kubectl get pods -l app.kubernetes.io/name=haproxy -n pmm
+      # Check operator-managed resources
+      kubectl get vmcluster,postgrescluster,clickhouseinstallation -n pmm
 
-        # Check operator-managed resources
-        kubectl get vmcluster,postgrescluster,clickhouseinstallation -n pmm
-
-        # Wait for all PMM pods to be ready
-        kubectl wait --for=condition=ready pod \
-          -l app.kubernetes.io/name=pmm \
-          -n pmm --timeout=600s
-        ```
+      # Wait for all PMM pods to be ready
+      kubectl wait --for=condition=ready pod \
+        -l app.kubernetes.io/name=pmm \
+        -n pmm --timeout=600s
+      ```
 
 ## Access PMM after installation
 
@@ -459,7 +456,7 @@ This load balancer automatically routes traffic to the active PMM leader and han
 | `pmm-ha-haproxy` | HAProxy load balancer with automatic failover | 443 (HTTPS) | **All external access**: PMM Clients, web browser, API calls, Percona Operators |
 | `monitoring-service` | Headless service for direct PMM pod access. **⚠️ Do not use directly** - bypasses HAProxy, can cause connection failures during leader changes or maintenance | 8443 (HTTPS) | Internal cluster communication only |
 
-**Access database components (advanced)**
+#### Access database components (advanced)
 
 For direct database access or troubleshooting, PMM HA also exposes:
 
@@ -794,7 +791,7 @@ pmmResources:
 
 PMM HA uses environment variables to control its behavior. The HA-specific variables are pre-configured for optimal cluster operation, while data retention and other settings can be customized to match your requirements.
 
-**Pre-configured HA variables**
+#### Pre-configured HA variables
 
 These variables are automatically set and manage critical cluster functions like leader election, gossip communication, and database integration:
 
@@ -812,7 +809,7 @@ pmmEnv:
 
 These variables are tested and validated for the HA architecture - modifying them is not recommended. PMM updates are managed through Helm chart upgrades rather than the UI to ensure consistency across all replicas.
 
-**Customizable settings**
+#### Customizable settings
 
 Adjust these variables in your `values.yaml` to match your monitoring requirements:
 
@@ -822,7 +819,7 @@ pmmEnv:
   # Add other environment variables as needed
 ```
 
-**Common customizations**
+#### Common customizations
 
 - **Data retention**: Set `DATA_RETENTION` based on your compliance requirements and storage capacity (e.g., `720h` for 30 days, `4320h` for 180 days)
 - **Additional variables**: See [PMM environment variables documentation](https://docs.percona.com/percona-monitoring-and-management/setting-up/server/docker.html#environment-variables) for all available options
@@ -950,7 +947,7 @@ helm upgrade pmm-ha percona/pmm-ha \
 !!! warning "Important behavior"
     When you scale PMM HA up or down, **all PMM pods will be recreated**. This happens because the `PMM_HA_PEERS` environment variable is dynamically generated based on replica count and must be updated on all pods.
     
-    **Impact**
+    **Impact**:
     
     - Brief service interruption during pod recreation (typically < 1 minute per pod)
     - HAProxy continues routing to available pods during rollout
@@ -1165,7 +1162,7 @@ kubectl patch <resource-type> <resource-name> -n pmm \
 
 ## Known issues
 
-We are aware of the following issues in this Tech Preview version and plan to fix them before General Availability:
+We are aware of the following issues in this Tech Preview version and plan to fix them before General Availability: 
 
 | Issue | Impact | Workaround |
 |-------|--------|------------|
@@ -1175,22 +1172,21 @@ We are aware of the following issues in this Tech Preview version and plan to fi
 | **[PMM-14707](https://perconadev.atlassian.net/browse/PMM-14707)**: Wrong PostgreSQL status | Inventory shows FAILED/UNSPECIFIED despite working metrics | Check dashboards to verify metrics flow |
 | **HA health badge**: Incorrect status | HA badge on PMM Home Dashboard may not reflect true cluster health | Use Inventory view or kubectl commands to check actual cluster status |
 
-[View all tracked issues →](https://perconadev.atlassian.net/issues/?jql=parent%3DPMM-14338%20and%20issuetype%3DBug%20and%20status%20not%20in%20(done%2C%20%22Pending%20Release%22)%20ORDER%20BY%20rank)
 
 ### Scaling limitations
 
-!!! danger "Scaling down to single replica"
-    When scaling down to a single PMM replica (from 3 to 1), ensure the **Raft leader is on pmm-0** before scaling. Kubernetes StatefulSets remove pods in reverse ordinal order (highest first).
+#### Scaling down to single replica"
+When scaling down to a single PMM replica (from 3 to 1), ensure the **Raft leader is on pmm-0** before scaling. Kubernetes StatefulSets remove pods in reverse ordinal order (highest first).
     
-    - Scaling 3→1 removes pmm-2 and pmm-1, keeping only pmm-0
-    - **If the Raft leader is on pmm-1 or pmm-2 when you scale down, PMM will become unreachable**
+  - Scaling 3→1 removes pmm-2 and pmm-1, keeping only pmm-0
+  - **If the Raft leader is on pmm-1 or pmm-2 when you scale down, PMM will become unreachable**
     
-    **Workaround**: Check leader status before scaling:
-    ```sh
-    kubectl exec -it pmm-ha-0 -n pmm -- pmm-admin status
-    ```
+**Workaround**: Check leader status before scaling:
+```sh
+kubectl exec -it pmm-ha-0 -n pmm -- pmm-admin status
+```
     
-    Only scale down after confirming `pmm-0` is the leader.
+Only scale down after confirming `pmm-0` is the leader.
 
 ### VictoriaMetrics limitations
 
@@ -1203,18 +1199,15 @@ PMM HA Tech Preview does not support these VictoriaMetrics Enterprise features:
 
 ## Uninstall PMM HA
 
-!!! danger "Critical: Follow this exact order"
-    Uninstalling out of sequence leaves orphaned resources that cannot be auto-cleaned.
+When uninstalling PMM HA, make sure to follow this exact order.    Uninstalling out of sequence leaves orphaned resources that cannot be auto-cleaned.
 
-### Uninstall procedure
-
-**Step 1: Remove PMM HA deployment**
+### Step 1: Remove PMM HA deployment
 
 ```sh
 helm uninstall pmm-ha --namespace pmm
 ```
 
-**Step 2: Wait for operator cleanup**
+### Step 2: Wait for operator cleanup
 
 Operators automatically remove managed resources. Wait for completion:
 
@@ -1235,34 +1228,33 @@ kubectl wait --for=delete clickhouseinstallation \
   -n pmm --timeout=300s
 ```
 
-**If wait times out**, check status:
+If wait times out, check status:
 
 ```sh
 kubectl get vmcluster,postgrescluster,clickhouseinstallation -n pmm
 ```
 
-**Step 3: Remove operators**
+### Step 3: Remove operators**
 
 Based on how you installed the operators:
 
-**If installed via pmm-ha-dependencies chart**
+=== "If installed via pmm-ha-dependencies chart" 
 
-```sh
-helm uninstall pmm-operators --namespace pmm
-```
+    ```sh
+    helm uninstall pmm-operators --namespace pmm
+    ```
 
-**If installed manually**
+=== "If installed manually"
 
-```sh
-helm uninstall victoria-metrics-operator --namespace pmm
-helm uninstall clickhouse-operator --namespace pmm
-helm uninstall postgres-operator --namespace pmm
-```
+    ```sh
+    helm uninstall victoria-metrics-operator --namespace pmm
+    helm uninstall clickhouse-operator --namespace pmm
+    helm uninstall postgres-operator --namespace pmm
+    ```
 
-**Step 4: (Optional) Delete CRDs**
+#### Step 4: (Optional) Delete CRDs**
 
-!!! danger "Cluster-wide deletion"
-    CRDs are cluster-wide. This deletes **all** resources of these types in **all** namespaces. Only proceed if you're removing these operators entirely from the cluster.
+CRDs are cluster-wide. This deletes **all** resources of these types in **all** namespaces. Only proceed if you're removing these operators entirely from the cluster:
 
 ```sh
 # Verify no other resources exist first
@@ -1274,7 +1266,7 @@ kubectl delete crds $(kubectl get crds -o name | grep clickhouse)
 kubectl delete crds $(kubectl get crds -o name | grep -E "(postgres-operator|perconapg)")
 ```
 
-**Step 5: (Optional) Delete data**
+### Step 5: (Optional) Delete data
 
 !!! warning "Permanent data loss"
     This irreversibly deletes all monitoring history, QAN data, dashboards, and configurations.
