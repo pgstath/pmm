@@ -52,16 +52,6 @@ Whether a server crashes, you're upgrading software, or scaling your infrastruct
 - **kubectl**: configured to access your cluster
 - **Persistent Volume Provisioner**: available in your cluster
 
-### Verify Kubernetes operators
-
-PMM HA requires three Kubernetes operators to manage distributed database resources. These operators must be installed **before** deploying PMM HA, as they manage the lifecycle of database resources through Custom Resource Definitions (CRDs).
-
-- **VictoriaMetrics Operator** (v0.56.4+): Manages VictoriaMetrics cluster for metrics storage
-- **Altinity ClickHouse Operator** (v0.25.4+): Manages ClickHouse cluster for QAN data
-- **Percona PostgreSQL Operator** (v2.8.0+): Manages PostgreSQL cluster for Grafana metadata
-
-You can install these operators via the `pmm-ha-dependencies` chart (recommended) or manually. See [Installation](#install-pmm-ha) for details.
-
 ### Check if your platform is supported
 
 !!! info "Tested Platform: Amazon EKS only"
@@ -128,6 +118,19 @@ The architecture consists of:
 - operator-managed database clusters (ClickHouse, VictoriaMetrics, and PostgreSQL) for resilient data storage
 
 ![HA Clustered diagram](../images/HA-diagram.jpg)
+### How operators manage databases
+
+PMM HA requires three Kubernetes operators to manage distributed databases:
+
+- VictoriaMetrics Operator: Manages metrics storage
+- Altinity ClickHouse Operator: Manages query analytics data
+- Percona PostgreSQL Operator: Manages Grafana metadata
+
+These operators handle scaling, failover, and replication automatically. 
+
+When you deploy PMM HA, the operators keep the databases healthy and available, which is how PMM survives node failures and recovers in under 30 seconds.
+
+You'll need to install these operators before deploying PMM HA.
 
 ### Learn high availability mechanisms
 PMM HA uses several mechanisms to ensure continuous operation:
