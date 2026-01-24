@@ -62,78 +62,93 @@ Storage requirements increase with the number of monitored services and data ret
 
 ## Installation
 
-1. Launch PMM Server with automatic restart enabled:
+Choose the installation method that fits your needs and launch PMM Server with automatic restart enabled.
+
+=== "Quick start"
+
+    Get PMM Server running in under a minute with minimal configuration:
+    {.power-number}
+
+    1. Launch PMM Server:
+      ```sh
+        docker run -d \
+          --name pmm-server \
+          --restart=always \
+          -p 443:8443 \
+          -v pmm-data:/srv \
+          percona/pmm-server:3
+      ```
+
+    2. Access PMM UI at `https://localhost` and log in with default credentials: `admin`/`admin` (change immediately after first login).
+
+=== "Recommended"
+
+    Add security and performance options for best practices:
+    {.power-number}
+
+    1. Launch PMM Server with recommended configuration:
+      ```sh
+        docker run -d \
+          --name pmm-server \
+          --restart=always \
+          -p 443:8443/tcp \
+          -v pmm-data:/srv \
+          -e DISABLE_UPDATES=true \
+          -e DISABLE_TELEMETRY=true \
+          --ulimit=nofile=1000000:1000000 \
+          percona/pmm-server:3
+      ```
+
+        **Key options explained:**
+
+        - `--restart=always`: Ensures automatic container restart after failures or reboots
+        - `-p 443:8443`: Exposes HTTPS port for secure web access
+        - `-v pmm-data:/srv`: Persists PMM data across container restarts
+        - `-e DISABLE_UPDATES=true`: Disables automatic PMM updates (control updates manually)
+        - `--ulimit=nofile=1000000:1000000`: Increases file descriptor limit for large deployments
+
+    2. Access PMM UI at `https://localhost` and log in with default credentials: `admin`/`admin` (change immediately after first login).
+
+=== "Docker Compose"
+
+    Use Docker Compose for easier management and reproducible deployments:
+    {.power-number}
+
+    1. Create a `docker-compose.yml` file:
+      ```yaml
+        version: '3.8'
+
+        services:
+          pmm-server:
+            image: percona/pmm-server:3
+            container_name: pmm-server
+            restart: always
+            ports:
+              - "443:8443"
+            volumes:
+              - pmm-data:/srv
+            environment:
+              - DISABLE_UPDATES=true
+              - DISABLE_TELEMETRY=true
+            ulimits:
+              nofile:
+                soft: 1000000
+                hard: 1000000
+
+        volumes:
+          pmm-data:
+      ```
+
+    2. Launch PMM Server:
 ```sh
-docker run -d \
-  --name pmm-server \
-  --restart=always \
-  -p 443:8443 \
-  -v pmm-data:/srv \
-  percona/pmm-server:3
+        docker-compose up -d
 ```
 
-2. Access PMM UI:**
-
-Open `https://localhost` in your browser and log in with default credentials: `admin`/`admin` (change immediately after first login)
-
-### Recommended production setup
-
-For production environments, use additional Docker options for better security and manageability:
-```sh
-docker run -d \
-  --name pmm-server \
-  --restart=always \
-  -p 443:8443/tcp \
-  -v pmm-data:/srv \
-  -e DISABLE_UPDATES=true \
-  -e DISABLE_TELEMETRY=true \
-  --ulimit=nofile=1000000:1000000 \
-  percona/pmm-server:3
-```
-
-**Key options explained:**
-
-- `--restart=always`: Ensures automatic container restart after failures or reboots
-- `-p 443:8443`: Exposes HTTPS port for secure web access
-- `-v pmm-data:/srv`: Persists PMM data across container restarts
-- `-e DISABLE_UPDATES=true`: Disables automatic PMM updates (control updates manually)
-- `--ulimit=nofile=1000000:1000000`: Increases file descriptor limit for large deployments
-
-### Using Docker Compose
-
-For easier management, create a `docker-compose.yml` file:
-```yaml
-version: '3.8'
-
-services:
-  pmm-server:
-    image: percona/pmm-server:3
-    container_name: pmm-server
-    restart: always
-    ports:
-      - "443:8443"
-    volumes:
-      - pmm-data:/srv
-    environment:
-      - DISABLE_UPDATES=true
-      - DISABLE_TELEMETRY=true
-    ulimits:
-      nofile:
-        soft: 1000000
-        hard: 1000000
-
-volumes:
-  pmm-data:
-```
-
-Launch PMM Server:
-```sh
-docker-compose up -d
-```
+    3. Access PMM UI at `https://localhost` and log in with default credentials: `admin`/`admin` (change immediately after first login).
 
 ### Verify installation
 
-Check that PMM Server is running:
+Regardless of which method you chose, verify that PMM Server is running correctly:
 ```sh
 # Check container status
 docker ps | grep pmm-server
@@ -419,5 +434,5 @@ Consider [Kubernetes HA Clustered](HA-clustered.md) when you:
 ## Get help
 
 - [Percona Community Forum](https://forums.percona.com/c/percona-monitoring-and-management-pmm/)
-- [Percona Support](https://www.percona.com/services/support) - Enterprise support for production 
+- [Percona Support](https://www.percona.com/services/support) 
 - [Docker deployment guide](../install-pmm/install-pmm-server/deployment-options/docker/index.md)

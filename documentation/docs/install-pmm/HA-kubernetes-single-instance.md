@@ -7,7 +7,9 @@ Kubernetes provides enterprise-grade high availability through automated contain
 
 ## What is Kubernetes HA Single-Instance?
 
-Kubernetes HA Single-Instance leverages Kubernetes' native pod management and self-healing capabilities to ensure PMM stays available even when infrastructure fails. Combined with persistent volumes and PMM Client caching, this approach prevents data loss and maintains monitoring continuity with minimal operational overhead.
+Kubernetes HA Single-Instance leverages Kubernetes' native pod management and self-healing capabilities to ensure PMM stays available even when infrastructure fails. 
+
+Combined with persistent volumes and PMM Client caching, this approach prevents data loss and maintains monitoring continuity with minimal operational overhead.
 
 ### Key benefits
 
@@ -24,7 +26,7 @@ Kubernetes watches your PMM deployment and fixes problems automatically.
 
 If a pod crashes or a node fails, Kubernetes restarts it on a healthy node within a few minutes.
 
- Your persistent volume keeps all your data safe—it stays attached when the pod moves. Your PMM Clients cache metrics locally, so nothing gets lost during the restart. Once PMM comes back up, everything syncs automatically.
+Your persistent volume keeps all your data safe and it stays attached when the pod moves. Your PMM Clients cache metrics locally, so nothing gets lost during the restart. Once PMM comes back up, everything syncs automatically.
 
 ### Limitations
 
@@ -80,84 +82,114 @@ helm version --short
 
 ## Installation
 
-### Quick start
+Choose the installation method that fits your needs and install PMM Server on Kubernetes.
 
-Install PMM using Helm with default settings:
-```sh
-# Add Percona Helm repository
-helm repo add percona https://percona.github.io/percona-helm-charts/
-helm repo update
+=== "Quick start"
 
-# Create namespace
-kubectl create namespace monitoring
+    Get PMM Server running with default settings:
+    {.power-number}
 
-# Install PMM Server
-helm install pmm percona/pmm \
-  --namespace monitoring \
-  --set service.type=LoadBalancer
-```
+    1. Add the Percona Helm repository:
+      ```sh
+        helm repo add percona https://percona.github.io/percona-helm-charts/
+        helm repo update
+      ```
 
-**Access PMM UI:**
-```sh
-# Get external IP (may take a minute to provision)
-kubectl get svc -n monitoring pmm-service
+    2. Create a namespace for PMM:
+      ```sh
+        kubectl create namespace monitoring
+      ```
 
-# Open https://<EXTERNAL-IP> in your browser
-# Default credentials: admin / admin (change immediately)
-```
+    3. Install PMM Server:
+      ```sh
+        helm install pmm percona/pmm \
+          --namespace monitoring \
+          --set service.type=LoadBalancer
+      ```
 
-### Recommended production installation
+    4. Get the external IP address:
+      ```sh
+        kubectl get svc -n monitoring pmm-service
+      ```
 
-For production environments, create a `values.yaml` file with custom settings:
-```yaml
-# values.yaml
-service:
-  type: LoadBalancer
-  annotations:
-    # AWS example - use NLB for better performance
-    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
-    # GCP example - use internal LB for VPC-only access
-    # cloud.google.com/load-balancer-type: "Internal"
+        The external IP may take a minute to provision. Look for the `EXTERNAL-IP` column.
 
-storage:
-  storageClassName: "fast-ssd"  # Use your fastest storage class
-  size: 100Gi
+    5. Open `https://<EXTERNAL-IP>` in your browser and log in with default credentials: `admin`/`admin` (change immediately after first login).
 
-resources:
-  requests:
-    memory: 4Gi
-    cpu: 2
-  limits:
-    memory: 8Gi
-    cpu: 4
+=== "Recommended"
 
-# Enable persistent volume
-persistence:
-  enabled: true
-  storageClass: "fast-ssd"
-  size: 100Gi
+    Customize your deployment with storage, resource, and security settings:
+    {.power-number}
 
-# Configure data retention (default: 30 days)
-env:
-  - name: DATA_RETENTION
-    value: "720h"  # 30 days
+    1. Create a `values.yaml` file with your configuration:
+      ```yaml
+        service:
+          type: LoadBalancer
+          annotations:
+            # AWS example - use NLB for better performance
+            service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+            # GCP example - use internal LB for VPC-only access
+            # cloud.google.com/load-balancer-type: "Internal"
 
-# Configure security
-secret:
-  # Change default password (or use existing secret)
-  pmm_password: "your-secure-password-here"
-```
+        storage:
+          storageClassName: "fast-ssd"  # Use your fastest storage class
+          size: 100Gi
 
-Install with custom values:
-```sh
-helm install pmm percona/pmm \
-  --namespace monitoring \
-  --values values.yaml
-```
+        resources:
+          requests:
+            memory: 4Gi
+            cpu: 2
+          limits:
+            memory: 8Gi
+            cpu: 4
+
+        # Enable persistent volume
+        persistence:
+          enabled: true
+          storageClass: "fast-ssd"
+          size: 100Gi
+
+        # Configure data retention (default: 30 days)
+        env:
+          - name: DATA_RETENTION
+            value: "720h"  # 30 days
+
+        # Configure security
+        secret:
+          # Change default password (or use existing secret)
+          pmm_password: "your-secure-password-here"
+      ```
+
+    2. Add the Percona Helm repository:
+      ```sh
+        helm repo add percona https://percona.github.io/percona-helm-charts/
+        helm repo update
+      ```
+
+    3. Create a namespace for PMM:
+      ```sh
+        kubectl create namespace monitoring
+      ```
+
+    4. Install PMM Server with your custom values:
+      ```sh
+        helm install pmm percona/pmm \
+          --namespace monitoring \
+          --values values.yaml
+      ```
+
+    5. Get the external IP address:
+      ```sh
+        kubectl get svc -n monitoring pmm-service
+      ```
+
+        Look for the `EXTERNAL-IP` column. The IP may take a minute to provision.
+
+    6. Open `https://<EXTERNAL-IP>` in your browser and log in with the password you set in `values.yaml`.
 
 ### Verify installation
 
-Check that PMM is running correctly:
+Regardless of which method you chose, verify that PMM Server is running correctly:
 ```sh
 # Check pod status
 kubectl get pods -n monitoring
@@ -208,57 +240,122 @@ secret:
 
 ### Configure external access
 
-Choose the appropriate service type for your environment:
+Choose the service type that fits your environment and apply the configuration.
 
-**LoadBalancer (recommended for cloud):**
-```yaml
-# values.yaml
-service:
-  type: LoadBalancer
-  annotations:
-    # Add cloud-provider-specific annotations
-```
+=== "LoadBalancer"
 
-**NodePort (for bare-metal or testing):**
-```yaml
-# values.yaml
-service:
-  type: NodePort
-  nodePort: 30443  # Optional: specify port
-```
+    **Best for**: Cloud environments (AWS, GCP, Azure)
 
-**ClusterIP with Ingress (recommended for production):**
-```yaml
-# values.yaml
-service:
-  type: ClusterIP
+    Use LoadBalancer for automatic provisioning of external IP addresses:
+    {.power-number}
 
-ingress:
-  enabled: true
-  className: nginx
-  annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
-  hosts:
-    - host: pmm.example.com
-      paths:
-        - path: /
-          pathType: Prefix
-  tls:
-    - secretName: pmm-tls
-      hosts:
-        - pmm.example.com
-```
+    1. Create or update your `values.yaml` file:
+      ```yaml
+        service:
+          type: LoadBalancer
+          annotations:
+            # Add cloud-provider-specific annotations
+            # AWS example:
+            # service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+            # GCP example:
+            # cloud.google.com/load-balancer-type: "Internal"
+      ```
 
-Apply changes:
-```sh
-helm upgrade pmm percona/pmm \
-  --namespace monitoring \
-  --values values.yaml
-```
+    2. Apply the configuration:
+      ```sh
+        helm upgrade pmm percona/pmm \
+          --namespace monitoring \
+          --values values.yaml
+      ```
+
+    3. Get the external IP address:
+      ```sh
+        kubectl get svc -n monitoring pmm-service
+      ```
+
+        Look for the `EXTERNAL-IP` column and connect via `https://<EXTERNAL-IP>`.
+
+=== "NodePort"
+
+    **Best for**: Bare-metal, on-premise, or testing environments
+
+    Use NodePort to expose PMM on a static port on each cluster node:
+    {.power-number}
+
+    1. Create or update your `values.yaml` file:
+      ```yaml
+        service:
+          type: NodePort
+          nodePort: 30443  # Optional: specify port (30000-32767 range)
+      ```
+
+    2. Apply the configuration:
+      ```sh
+        helm upgrade pmm percona/pmm \
+          --namespace monitoring \
+          --values values.yaml
+      ```
+
+    3. Get the assigned NodePort:
+      ```sh
+        kubectl get svc -n monitoring pmm-service
+      ```
+
+        Look for the `PORT(S)` column showing the NodePort number.
+
+    4. Access PMM using any node IP and the NodePort:
+      ```
+        https://<any-node-ip>:<nodeport>
+      ```
+
+=== "Ingress"
+
+    **Best for**: Production environments with existing ingress controller
+
+    Use Ingress for advanced routing, SSL termination, and custom domain names:
+    {.power-number}
+
+    1. Create or update your `values.yaml` file:
+      ```yaml
+        service:
+          type: ClusterIP
+
+        ingress:
+          enabled: true
+          className: nginx
+          annotations:
+            cert-manager.io/cluster-issuer: "letsencrypt-prod"
+          hosts:
+            - host: pmm.example.com
+              paths:
+                - path: /
+                  pathType: Prefix
+          tls:
+            - secretName: pmm-tls
+              hosts:
+                - pmm.example.com
+      ```
+
+        Replace `pmm.example.com` with your domain.
+
+    2. Apply the configuration:
+      ```sh
+        helm upgrade pmm percona/pmm \
+          --namespace monitoring \
+          --values values.yaml
+      ```
+
+    3. Access PMM at your configured domain:
+      ```
+        https://pmm.example.com
+      ```
+
+    !!! note "Prerequisites"
+        Ensure you have an ingress controller (e.g., NGINX, Traefik) and cert-manager installed in your cluster.
 
 ### Configure storage
 
-**Choose appropriate storage class:**
+**Choose appropriate storage class**
 ```yaml
 # values.yaml
 persistence:
@@ -274,7 +371,7 @@ persistence:
   #     type: ssd
 ```
 
-**Common storage classes by provider:**
+**Common storage classes by provider**
 
 - **AWS**: `gp3` (recommended), `gp2`, `io1`
 - **GCP**: `pd-ssd`, `pd-balanced`
@@ -318,7 +415,7 @@ resources:
     cpu: "4"
 ```
 
-**Sizing guidelines:**
+**Sizing guidelines**
 
 | Monitored databases | Memory | CPU | Storage |
 |-------------------|--------|-----|---------|
@@ -430,7 +527,7 @@ kubectl exec -n monitoring -l app=pmm -- df -h /srv
 
 ### Backup and restore
 
-**Create backup:**
+**Create backup**
 ```sh
 # Create VolumeSnapshot (requires CSI driver with snapshot support)
 kubectl create -f - <<EOF
@@ -449,7 +546,7 @@ EOF
 kubectl get volumesnapshot -n monitoring
 ```
 
-**Restore from backup:**
+**Restore from backup**
 ```sh
 # Create new PVC from snapshot
 kubectl create -f - <<EOF
@@ -683,9 +780,8 @@ Consider using [Docker HA](HA-docker.md) instead if:
 
 ## Get help
 
-- Join the [PMM Community Forums](https://per.co.na/PMM3_forums) to discuss features, ask questions, and chat in real time with engineers and other users.
-- [Contact Percona Support](https://www.percona.com/services/support) for enterprise-level help with production issues.
- for enterprise-level help with production issues.
+- Join the [PMM Community Forums](https://per.co.na/PMM3_forums) 
+- [Contact Percona Support](https://www.percona.com/services/support) 
 - Report bugs or technical issues through the [PMM JIRA Issue Tracker](https://perconadev.atlassian.net/jira/software/c/projects/PMM/issues/)
 - [Helm chart documentation](https://github.com/percona/percona-helm-charts/tree/main/charts/pmm)
 - [Kubernetes best practices for PMM](../install-pmm/install-pmm-server/deployment-options/helm/index.md)

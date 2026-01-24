@@ -36,7 +36,7 @@ All three options prevent data loss through PMM Client caching during outages.
 | **Zero downtime** | No | No | Yes |
 | **Setup complexity** | Very Low | Low | High |
 | **Resource overhead** | 1x | 1.2x | 3-5x |
-| **Monitoring data preserved** | Yes - stored on clients during outage | Yes - stored on clients during outage | Yes - always available on multiple servers |
+| **Monitoring data preserved** | Yes, stored on clients during outage | Yes, stored on clients during outage | Yes, always available on multiple servers |
 
 ## HA deployment options
 
@@ -96,18 +96,15 @@ Choose the deployment option that matches your infrastructure and requirements:
     - You need production-ready HA
     - You can tolerate 2-5 minutes of downtime
     - You want automatic recovery without complexity
-    - ****choice for 90% of production deployments
+    - choice for 90% of production deployments
 
-    [View Kubernetes HA installation guide →](../install-pmm/HA-kubernetes-single-instance).
+    [View Kubernetes HA installation guide](../install-pmm/HA-kubernetes-single-instance.md){.md-button} 
 
 === "Kubernetes HA (clustered)"
 
-    **Status** **Technical Preview - NOT for production**
+    **Status** Technical Preview - NOT for production environments. Use for testing and feedback purposes only.
 
     Zero-downtime high availability with multiple active PMM instances, distributed databases, and automatic load balancing.
-
-    !!! warning "Technical Preview"
-        This deployment option is in **Technical Preview** and should **NOT be used in production environments**. It is provided for testing and feedback purposes only.
 
     **Key features**
     

@@ -347,33 +347,32 @@ Installs monitoring infrastructure:
         ```
 
     === "Using YAML file"
-        If you prefer to manage the secret as a file, create pmm-secret.yaml:
-        {.power-number}
 
-        1. Create `pmm-secret.yaml`:
+    If you prefer to manage the secret as a file, create pmm-secret.yaml:
+    {.power-number}
 
-          ```yaml
-          apiVersion: v1
-          kind: Secret
-          metadata:
-            name: pmm-secret
-            namespace: pmm
-          type: Opaque
-          stringData:
-            PMM_ADMIN_PASSWORD: "your-secure-password"
-            PMM_CLICKHOUSE_USER: "clickhouse_pmm"
-            PMM_CLICKHOUSE_PASSWORD: "your-clickhouse-password"
-            VMAGENT_remoteWrite_basicAuth_username: "victoriametrics_pmm"
-            VMAGENT_remoteWrite_basicAuth_password: "your-vm-password"
-            PG_PASSWORD: "your-postgres-password"
-            GF_PASSWORD: "your-grafana-password"
-          ```
+    1. Create `pmm-secret.yaml`:
+    ```yaml
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: pmm-secret
+          namespace: pmm
+        type: Opaque
+        stringData:
+          PMM_ADMIN_PASSWORD: "your-secure-password"
+          PMM_CLICKHOUSE_USER: "clickhouse_pmm"
+          PMM_CLICKHOUSE_PASSWORD: "your-clickhouse-password"
+          VMAGENT_remoteWrite_basicAuth_username: "victoriametrics_pmm"
+          VMAGENT_remoteWrite_basicAuth_password: "your-vm-password"
+          PG_PASSWORD: "your-postgres-password"
+          GF_PASSWORD: "your-grafana-password"
+    ```
 
-        2. Apply it:
-
-        ```sh
+    2. Apply it:
+    ```sh
         kubectl apply -f pmm-secret.yaml
-        ```
+    ```
 
     ### Step 5: Install PMM HA
 
@@ -393,23 +392,23 @@ Installs monitoring infrastructure:
         1. Create a `values.yaml` file:
 
             ```yaml
-            # Example custom values
-            replicas: 3  # Number of PMM server replicas
+              # Example custom values
+              replicas: 3  # Number of PMM server replicas
 
-            haproxy:
-              service:
-                type: LoadBalancer  # Change to LoadBalancer for external access
+              haproxy:
+                service:
+                  type: LoadBalancer  # Change to LoadBalancer for external access
 
-            storage:
-              size: 100Gi  # Adjust storage size as needed
+              storage:
+                size: 100Gi  # Adjust storage size as needed
 
-            pmmResources:
-              requests:
-                cpu: "2"
-                memory: "4Gi"
-              limits:
-                cpu: "4"
-                memory: "8Gi"
+              pmmResources:
+                requests:
+                  cpu: "2"
+                  memory: "4Gi"
+                limits:
+                  cpu: "4"
+                  memory: "8Gi"
             ```
 
         2. Install with custom values:
@@ -420,7 +419,7 @@ Installs monitoring infrastructure:
 
     ### Step 6: Verify installation
     
-      ```sh
+    ```sh
         # Check PMM server pods
         kubectl get pods -l app.kubernetes.io/name=pmm -n pmm
 
@@ -434,7 +433,7 @@ Installs monitoring infrastructure:
         kubectl wait --for=condition=ready pod \
           -l app.kubernetes.io/name=pmm \
           -n pmm --timeout=600s
-        ```
+      ```
 
 ## Access PMM after installation
 
@@ -493,23 +492,23 @@ By default, HAProxy is only accessible within the Kubernetes cluster. To enable 
       ```
 
     2. Apply the configuration:
-      ```sh
+        ```sh
         helm upgrade pmm-ha percona/pmm-ha \
           --namespace pmm \
           -f values.yaml
-      ```
+        ```
 
-        Or use the command-line flag:
-      ```sh
-        helm upgrade pmm-ha percona/pmm-ha \
-          --namespace pmm \
-          --set haproxy.service.type=LoadBalancer
-      ```
+          Or use the command-line flag:
+          ```sh
+          helm upgrade pmm-ha percona/pmm-ha \
+            --namespace pmm \
+            --set haproxy.service.type=LoadBalancer
+          ```
 
     3. Get the external endpoint:
-      ```sh
-        kubectl get svc pmm-ha-haproxy -n pmm
-      ```
+        ```sh
+          kubectl get svc pmm-ha-haproxy -n pmm
+        ```
 
         Look for the `EXTERNAL-IP` column and connect via `https://<EXTERNAL-IP>:443`.
 
@@ -600,7 +599,7 @@ Configure LoadBalancer settings optimized for your cloud provider:
     {.power-number}
 
     1. Create a `values.yaml` file with AWS-specific annotations:
-```yaml
+    ```yaml
         haproxy:
           service:
             type: LoadBalancer
@@ -613,17 +612,17 @@ Configure LoadBalancer settings optimized for your cloud provider:
               
               # Optional: Use specific Elastic IPs for stable addresses (internet-facing only)
               # service.beta.kubernetes.io/aws-load-balancer-eip-allocations: "eipalloc-xxx,eipalloc-yyy"
-```
+      ```
 
     2. Apply the configuration:
-```sh
+      ```sh
         helm upgrade pmm-ha percona/pmm-ha --namespace pmm -f values.yaml
-```
+      ```
 
     3. Get the load balancer endpoint:
-```sh
+      ```sh
         kubectl get svc pmm-ha-haproxy -n pmm
-```
+      ```
 
         Look for the `EXTERNAL-IP` column and connect via `https://<EXTERNAL-IP>:443`.
 
@@ -640,16 +639,16 @@ Configure LoadBalancer settings optimized for your cloud provider:
     {.power-number}
 
     1. Reserve a static IP in your region:
-```sh
+      ```sh
         gcloud compute addresses create pmm-ip --region=us-central1
-```
+      ```
 
     2. Get the IP address:
-```sh
+      ```sh
         gcloud compute addresses describe pmm-ip \
           --region=us-central1 \
           --format="value(address)"
-```
+      ```
 
         Note this IP for the next step.
 
@@ -657,7 +656,7 @@ Configure LoadBalancer settings optimized for your cloud provider:
     {.power-number}
 
     1. Create a `values.yaml` file:
-```yaml
+      ```yaml
         haproxy:
           service:
             type: LoadBalancer
@@ -666,17 +665,17 @@ Configure LoadBalancer settings optimized for your cloud provider:
             annotations:
               # Internal LB (VPC only) - remove for external/public access
               networking.gke.io/load-balancer-type: "Internal"
-```
+      ```
 
     2. Apply the configuration:
-```sh
+      ```sh
         helm upgrade pmm-ha percona/pmm-ha --namespace pmm -f values.yaml
-```
+      ```
 
     3. Get the load balancer endpoint:
-```sh
+      ```sh
         kubectl get svc pmm-ha-haproxy -n pmm
-```
+      ```
 
         Look for the `EXTERNAL-IP` column and connect via `https://<EXTERNAL-IP>:443`.
 
@@ -693,24 +692,24 @@ Configure LoadBalancer settings optimized for your cloud provider:
     {.power-number}
 
     1. Create a static IP in your AKS cluster's resource group:
-```sh
+      ```sh
         az network public-ip create \
           --resource-group MC_myResourceGroup_myAKSCluster_eastus \
           --name pmmPublicIP \
           --sku Standard \
           --allocation-method static
-```
+      ```
 
         Replace `MC_myResourceGroup_myAKSCluster_eastus` with your AKS infrastructure resource group.
 
     2. Get the IP address:
-```sh
+      ```sh
         az network public-ip show \
           --resource-group MC_myResourceGroup_myAKSCluster_eastus \
           --name pmmPublicIP \
           --query ipAddress \
           --output tsv
-```
+      ```
 
         Note this IP for the next step.
 
@@ -718,7 +717,7 @@ Configure LoadBalancer settings optimized for your cloud provider:
     {.power-number}
 
     1. Create a `values.yaml` file:
-```yaml
+      ```yaml
         haproxy:
           service:
             type: LoadBalancer
@@ -727,17 +726,17 @@ Configure LoadBalancer settings optimized for your cloud provider:
             annotations:
               # Internal LB (VNet only) - remove for external/public access
               service.beta.kubernetes.io/azure-load-balancer-internal: "true"
-```
+      ```
 
     2. Apply the configuration:
-```sh
+      ```sh
         helm upgrade pmm-ha percona/pmm-ha --namespace pmm -f values.yaml
-```
+      ```
 
     3. Get the load balancer endpoint:
-```sh
+      ```sh
         kubectl get svc pmm-ha-haproxy -n pmm
-```
+    ```
 
         Look for the `EXTERNAL-IP` column and connect via `https://<EXTERNAL-IP>:443`.
 
