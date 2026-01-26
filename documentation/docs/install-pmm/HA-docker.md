@@ -227,7 +227,7 @@ docker exec pmm-server supervisorctl restart nginx
 Connect PMM Clients to start monitoring your databases:
 ```sh
 # Install PMM Client on database host
-curl -fsSL https://www.percona.com/downloads/pmm2/pmm-client.sh | sh
+curl -fsSL https://www.percona.com/downloads/pmm3/pmm-client.sh | sh
 
 # Connect to PMM Server
 pmm-admin config --server-url=https://admin:password@pmm-server:443
@@ -362,12 +362,16 @@ docker logs pmm-server
 
 **Problem**: PMM Server consuming excessive memory
 
-**Solution**: Reduce retention period and limit monitored services:
+**Solution**: Reduce retention period or check resource usage:
+
 ```sh
 # Reduce retention to 7 days
 docker exec pmm-server pmm-admin config --data-retention=7d
 
-# Check which services consume most resources
+# Check container resource usage
+docker stats pmm-server --no-stream
+
+# Check which services are monitored
 docker exec pmm-server pmm-admin list
 ```
 
