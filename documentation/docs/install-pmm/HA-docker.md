@@ -94,7 +94,6 @@ Choose the installation method that fits your needs and launch PMM Server with a
           -p 443:8443/tcp \
           -v pmm-data:/srv \
           -e DISABLE_UPDATES=true \
-          -e DISABLE_TELEMETRY=true \
           --ulimit=nofile=1000000:1000000 \
           percona/pmm-server:3
       ```
