@@ -128,7 +128,6 @@ Choose the installation method that fits your needs and launch PMM Server with a
               - pmm-data:/srv
             environment:
               - DISABLE_UPDATES=true
-              - DISABLE_TELEMETRY=true
             ulimits:
               nofile:
                 soft: 1000000
