@@ -378,7 +378,7 @@ docker exec pmm-server pmm-admin list
 **Solution**: Verify network connectivity and firewall rules:
 ```sh
 # Test from client host
-curl -k https://pmm-server:443/ping
+curl -k https://127.0.0.1:443/ping
 
 # Check firewall rules
 sudo iptables -L | grep 443
