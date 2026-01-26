@@ -871,7 +871,7 @@ PMM displays a visual badge on the side menu of the side menu and displays the n
 
 Check this to quickly identify which server is active without needing to query the cluster directly:
 
-![PMM HA Status badge](../images/HA-inventory-nodes.png)
+![PMM HA Status badge](../images/HA-Status.png)
 
 The badge also includes a health status indicator that reflects the overall cluster state based on how many nodes are responding:
 
@@ -1078,10 +1078,23 @@ Use Helm upgrades to modify settings like resource limits, replica counts, or st
 
 #### Roll back configuration changes
 
-If a configuration change causes issues, rollback to the previous settings:
-```sh
-helm rollback pmm-ha --namespace pmm
-```
+If a configuration change causes issues, roll back to a previous release:
+{.power-number}
+
+1. List available revisions:
+  ```sh
+    helm history pmm-ha -n pmm
+  ```
+
+2. Roll back to a specific revision:
+  ```sh
+    helm rollback pmm-ha <revision-number> -n pmm
+  ```
+
+    For example, to roll back to revision 2:
+  ```sh
+    helm rollback pmm-ha 2 -n pmm
+  ```
 
 This restores your previous Helm release configuration, reverting any settings changes you made.
 
@@ -1135,7 +1148,7 @@ We are aware of the following issues in this Tech Preview version and plan to fi
 | **[PMM-14705](https://perconadev.atlassian.net/browse/PMM-14705)**: CLI-added services show no metrics | Services from `pmm-admin` appear as UNSPECIFIED, dashboards empty (QAN works) | Add services via PMM UI instead |
 | **[PMM-14706](https://perconadev.atlassian.net/browse/PMM-14706)**: Extra 'pmm-' prefix | PostgreSQL nodes show as `pmm-pmm-ha-pg-...` | Cosmetic only - no action needed |
 | **[PMM-14707](https://perconadev.atlassian.net/browse/PMM-14707)**: Wrong PostgreSQL status | Inventory shows FAILED/UNSPECIFIED despite working metrics | Check dashboards to verify metrics flow |
-| **HA health badge**: Incorrect status | HA badge on PMM Home Dashboard may not reflect true cluster health | Use Inventory view or kubectl commands to check actual cluster status |
+| **[PMM-14734](https://perconadev.atlassian.net/browse/PMM-14734)**: Incorrect status | HA badge on PMM Home Dashboard may not reflect true cluster health | Use Inventory view or kubectl commands to check actual cluster status |
 
 ### Scaling limitations
 
