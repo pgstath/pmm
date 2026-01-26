@@ -198,7 +198,7 @@ A healthy PMM HA deployment should be mostly green with only short gaps during p
 
 Shows each of your PostgreSQL pods with their status (UP or DOWN) and role (Primary or Replica). In a healthy cluster, you should see one Primary and the rest as Replicas, all showing UP in green.
 
-If the Primary shows DOWN, a failover is either in progress or just completed—check that a Replica was promoted to become the new Primary. 
+If the Primary shows DOWN, a failover is either in progress or just completed. Check that a Replica was promoted to become the new Primary. 
 
 If you see multiple Primaries, you have a split-brain condition that needs immediate attention. 
 
@@ -257,7 +257,7 @@ If one pod shows DOWN, your load balancing is still working but with reduced cap
 
 Investigate DOWN pods quickly to restore full redundancy and prevent a single point of failure. Check pod logs to identify whether the issue is configuration, resource limits, or connectivity problems.
 
-Use this table to identify which specific HAProxy pods need attention when the [**HAProxy**](#haproxy)health indicator shows **Not Healthy**.
+Use this table to identify which specific HAProxy pods need attention when the [**HAProxy**](#haproxy) health indicator shows **Not Healthy**.
 
 ### HAProxy Backends
 

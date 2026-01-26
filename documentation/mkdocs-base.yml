@@ -220,8 +220,8 @@ nav:
       - Install PMM in HA mode: 
         - Compare HA options: install-pmm/HA.md
         - Docker HA: install-pmm/HA-docker.md
-        - Kubernetes single-instance: install-pmm/HA-kubernetes-single-instance.md
-        - Kubernetes clustered: 
+        - Kubernetes Single-Instance: install-pmm/HA-kubernetes-single-instance.md
+        - Kubernetes Clustered: 
             - Understand PMM HA Clustered: install-pmm/HA-clustered.md
             - Install PMM HA Clustered: install-pmm/install-HA-clustered.md
 

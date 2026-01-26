@@ -138,9 +138,9 @@ Choose the installation method that fits your needs and launch PMM Server with a
       ```
 
     2. Launch PMM Server:
-```sh
+    ```sh
         docker-compose up -d
-```
+    ```
 
     3. Access PMM UI at `https://localhost` and log in with default credentials: `admin`/`admin` (change immediately after first login).
 

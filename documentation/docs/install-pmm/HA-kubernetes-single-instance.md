@@ -780,8 +780,8 @@ Consider using [Docker HA](HA-docker.md) instead if:
 
 ## Get help
 
-- Join the [PMM Community Forums](https://per.co.na/PMM3_forums) 
+- [PMM Community Forums](https://per.co.na/PMM3_forums) 
 - [Contact Percona Support](https://www.percona.com/services/support) 
-- Report bugs or technical issues through the [PMM JIRA Issue Tracker](https://perconadev.atlassian.net/jira/software/c/projects/PMM/issues/)
+- [Report bugs or technical issues](https://perconadev.atlassian.net/jira/software/c/projects/PMM/issues/)
 - [Helm chart documentation](https://github.com/percona/percona-helm-charts/tree/main/charts/pmm)
 - [Kubernetes best practices for PMM](../install-pmm/install-pmm-server/deployment-options/helm/index.md)

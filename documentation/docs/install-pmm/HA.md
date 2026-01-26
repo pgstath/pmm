@@ -27,9 +27,9 @@ Critical systems requiring sub-second failover gain the most value from PMM HA, 
 
 All three options prevent data loss through PMM Client caching during outages.
 
-| Feature | [Docker](../install-pmm/HA-docker.md) | [Kubernetes (single-instance)](../install-pmm/HA-kubernetes-single-instance.md) | [Kubernetes (clustered)](../install-pmm/HA-clustered.md) |
+| Feature | [Docker](../install-pmm/HA-docker.md) | [Kubernetes (Single-Instance)](../install-pmm/HA-kubernetes-single-instance.md) | [Kubernetes (Clustered)](../install-pmm/HA-clustered.md) |
 |---------|--------|-------------------|---------------------|
-| **Status** | ✅ GA - Production ready | ✅ GA - Production-ready | ⚠️ Tech Preview - Testing only |
+| **Status** | ✅ GA (Production ready) | ✅ GA (Production-ready)  | ⚠️ Tech Preview (Testing only) |
 | **Kubernetes required** | No | Yes | Yes |
 | **PMM instances** | 1 | 1 | 3 |
 | **Failover time** | 1-3 min | 2-5 min | < 30 sec |
@@ -102,7 +102,7 @@ Choose the deployment option that matches your infrastructure and requirements:
 
 === "Kubernetes HA (clustered)"
 
-    **Status** Technical Preview - NOT for production environments. Use for testing and feedback purposes only.
+    **Status**: Technical Preview (NOT for production environments). Use for testing and feedback purposes only.
 
     Zero-downtime high availability with multiple active PMM instances, distributed databases, and automatic load balancing.
 
