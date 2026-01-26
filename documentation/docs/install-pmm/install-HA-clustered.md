@@ -337,7 +337,7 @@ This load balancer automatically routes traffic to the active PMM leader and han
 | Service | Description | Port | Use for |
 |---------|-------------|------|---------|
 | `pmm-ha-haproxy` | HAProxy load balancer with automatic failover | 443 (HTTPS) | **All external access**: PMM Clients, web browser, API calls, Percona Operators |
-| `monitoring-service` | Headless service for direct PMM pod access. **⚠️ Do not use directly** - bypasses HAProxy, can cause connection failures during leader changes or maintenance | 8443 (HTTPS) | Internal cluster communication only |
+| `monitoring-service` | Headless service for direct PMM pod access. **Do not use for external connections** as it bypasses HAProxy and can cause failures during leader changes | 8443 (HTTPS) | Internal cluster communication only |
 
 #### Access database components (advanced)
 
