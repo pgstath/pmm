@@ -233,7 +233,7 @@ curl -fsSL https://www.percona.com/downloads/pmm2/pmm-client.sh | sh
 pmm-admin config --server-url=https://admin:password@pmm-server:443
 
 # Add database service (example: MySQL)
-pmm-admin add mysql --username=pmm --password=pass --query-source=perfschema
+pmm-admin add mysql --username=admin --password=password --query-source=perfschema
 ```
 
 ### Test automatic restart
