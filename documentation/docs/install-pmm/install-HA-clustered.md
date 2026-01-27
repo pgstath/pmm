@@ -1,9 +1,7 @@
-##  Install PMM HA Clustered
-
 !!! warning "Technical Preview: Not production-ready"
     This feature is in **Technical Preview** for testing and feedback only. Expect [known issues](#known-issues), breaking changes, and incomplete features.
     
-    **Test in non-production environments only** and [provide feedback](#provide-feedback) to shape the GA release.
+    **Test in non-production environments only** and [provide feedback](#get-help-and-provide-feedback) to shape the GA release.
 
 !!! danger "VictoriaMetrics limitations"
     This Tech Preview does not support:
