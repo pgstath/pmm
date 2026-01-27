@@ -72,7 +72,7 @@ Choose the deployment option that matches your infrastructure and requirements:
     
     [View Docker HA installation guide](../install-pmm/HA-docker.md){.md-button} 
 
-=== "Kubernetes HA (single-instance)" 
+=== "Kubernetes HA (Single-Instance)" 
 
     **Status** **Production-ready**
 
@@ -100,7 +100,7 @@ Choose the deployment option that matches your infrastructure and requirements:
 
     [View Kubernetes HA installation guide](../install-pmm/HA-kubernetes-single-instance.md){.md-button} 
 
-=== "Kubernetes HA (clustered)"
+=== "Kubernetes HA (Clustered)"
 
     **Status**: Technical Preview (NOT for production environments). Use for testing and feedback purposes only.
 
@@ -125,16 +125,15 @@ Choose the deployment option that matches your infrastructure and requirements:
     - NOT production-ready as it has known bugs
     - complex setup requiring 3 Kubernetes operators
     - 3x resource overhead minimum
-    - subject to breaking changes
-    - node selection shows incorrect PostgreSQL instances
-    - services added via pmm-admin don't show dashboard data
+    - Subject to breaking changes
+    - Node selection shows incorrect PostgreSQL instances
+    - Services added via pmm-admin don't show dashboard data
     - PostgreSQL monitoring may show incorrect FAILED status
 
     **When to use this option**
     
-    - you understand this is NOT production-ready
-    - you need continuous monitoring visibility (no 2-5 min gaps)
-    - you have strict SLA requirements for sub-30-second failover
-    - you need multiple active PMM instances for load distribution
-    - you have expert Kubernetes skills
-    - you are evaluating zero-downtime architecture for future production, or testing environments where you need to validate continuous monitoring capabilities
+    - You are evaluating zero-downtime architecture for future production, or testing environments where you need to validate continuous monitoring capabilities
+    - You need continuous monitoring visibility (no 2-5 min gaps)
+    - You have strict SLA requirements for sub-30-second failover
+    - You need multiple active PMM instances for load distribution
+    - You have expert Kubernetes skills

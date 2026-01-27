@@ -19,18 +19,18 @@ Docker HA leverages Docker's automatic container recovery to restart the PMM Ser
 
 ### How it works
 
-When you launch PMM Server with the `--restart=always` flag, Docker monitors the container and automatically restarts it if:
+When you launch PMM Server with the `--restart=always` flag, Docker monitors the container and automatically restarts it if the:
 
-- The PMM Server process crashes
-- The container stops unexpectedly
-- The host system reboots
+- PMM Server process crashes
+- container stops unexpectedly
+- host system reboots
 
 During any downtime, PMM Clients automatically:
 
-- Detect the connection failure
-- Begin caching metrics data locally
-- Continue attempting to reconnect
-- Transfer all cached data once the connection is restored
+- detect the connection failure
+- begin caching metrics data locally
+- continue attempting to reconnect
+- transfer all cached data once the connection is restored
 
 **Typical recovery time**: 1-3 minutes
 
@@ -98,7 +98,7 @@ Choose the installation method that fits your needs and launch PMM Server with a
           percona/pmm-server:3
       ```
 
-        **Key options explained:**
+        where:
 
         - `--restart=always`: Ensures automatic container restart after failures or reboots
         - `-p 443:8443`: Exposes HTTPS port for secure web access

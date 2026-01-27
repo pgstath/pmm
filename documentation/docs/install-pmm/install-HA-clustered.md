@@ -15,7 +15,7 @@
 
 This sets up three PMM server replicas with Raft consensus, configures HAProxy for automatic load balancing, and deploys distributed databases (ClickHouse, VictoriaMetrics, PostgreSQL) via Kubernetes operators.
 
-Before you start, make sure you understand how HA Clustered works. See [Understand HA Clustered](../understand/HA-clustered.md) for an overview of the architecture and how failover works.
+Before you start, make sure you understand how HA Clustered works. See [Understand HA Clustered](../install-pmm/HA-clustered.md) for an overview of the architecture and how failover works.
 
 ### Understand two-step installation
 
@@ -25,19 +25,19 @@ PMM HA Clustered uses a two-step installation process that separates database op
 
 Installs Kubernetes operators to create and manage database clusters:
 
-- VictoriaMetrics Operator
-- ClickHouse Operator
-- PostgreSQL Operator
+- VictoriaMetrics operator
+- ClickHouse operator
+- PostgreSQL operator
 
 #### Step 2: Install PMM HA
 
 Installs monitoring infrastructure:
 
-- **3 PMM monitoring servers**: Automatic leader election with Raft consensus (one active leader, two standbys)
-- **3 HAProxy load balancers**: Routes traffic to the active leader with automatic failover and pod  anti-affinity
-- **ClickHouse cluster**: 3 replicas with ClickHouse Keeper for Query Analytics storage (managed by Altinity ClickHouse Operator)
-- **VictoriaMetrics cluster**: Distributed metrics storage with multiple replicas (managed by VictoriaMetrics Operator)
-- **PostgreSQL cluster**: HA cluster for Grafana metadata (managed by Percona PostgreSQL Operator)
+- **3 PMM monitoring servers** with automatic leader election using Raft consensus (one active leader, two standbys)
+- **3 HAProxy load balancers** that route traffic to the active leader with automatic failover and pod anti-affinity
+- **ClickHouse cluster** with 3 replicas and ClickHouse Keeper for Query Analytics storage (managed by Altinity ClickHouse Operator)
+- **VictoriaMetrics cluster** for distributed metrics storage with multiple replicas (managed by VictoriaMetrics Operator)
+- **PostgreSQL cluster** providing HA storage for Grafana metadata (managed by Percona PostgreSQL Operator)
 
 To install PMM HA:
 
@@ -790,7 +790,7 @@ pmmEnv:
 #### Common customizations
 
 - **Data retention**: Set `DATA_RETENTION` based on your compliance requirements and storage capacity (e.g., `720h` for 30 days, `4320h` for 180 days)
-- **Additional variables**: See [PMM environment variables documentation](https://docs.percona.com/percona-monitoring-and-management/setting-up/server/docker.html#environment-variables) for all available options
+- **Additional variables**: See [PMM environment variables documentation](../install-pmm/install-pmm-server/deployment-options/docker/env_var.md) for all available options.
 
 ### Review Helm parameters reference
 

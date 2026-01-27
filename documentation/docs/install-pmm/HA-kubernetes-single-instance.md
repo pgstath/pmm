@@ -312,6 +312,9 @@ Choose the service type that fits your environment and apply the configuration.
 
     **Best for**: Production environments with existing ingress controller
 
+    !!! note "Prerequisites"
+        Ensure you have an ingress controller (e.g., NGINX, Traefik) and cert-manager installed in your cluster.
+        
     Use Ingress for advanced routing, SSL termination, and custom domain names:
     {.power-number}
 
@@ -350,8 +353,7 @@ Choose the service type that fits your environment and apply the configuration.
         https://pmm.example.com
       ```
 
-    !!! note "Prerequisites"
-        Ensure you have an ingress controller (e.g., NGINX, Traefik) and cert-manager installed in your cluster.
+
 
 ### Configure storage
 
