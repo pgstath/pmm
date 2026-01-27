@@ -862,7 +862,7 @@ Access the dashboard from **All Dashboards > Browse all dashboards > Experimenta
 
 The dashboard helps you quickly identify component failures, resource constraints, and stability issues across your high-availability infrastructure. 
 
-For detailed information about each panel and what to check, see the [PMM HA Health Overview dashboard reference](../reference/dashboards/dashboard-pmm-ha-health-overview.md).
+For detailed information about each panel and what to check, see the [PMM HA Health Overview dashboard reference](../reference/dashboards/dashboard-ha-health-overview.md).
 
 #### Identify the leader node
 
@@ -1214,13 +1214,13 @@ kubectl get vmcluster,postgrescluster,clickhouseinstallation -n pmm
 
 Based on how you installed the operators:
 
-=== "If installed via pmm-ha-dependencies chart" 
+=== "Installed via pmm-ha-dependencies chart" 
 
     ```sh
     helm uninstall pmm-operators --namespace pmm
     ```
 
-=== "If installed manually"
+=== "Installed manually"
 
     ```sh
     helm uninstall victoria-metrics-operator --namespace pmm
@@ -1279,9 +1279,9 @@ This Tech Preview release is designed to gather community feedback before GA. Yo
 
 ### Contact us
 
-- Join the [PMM Community Forums](https://per.co.na/PMM3_forums) 
+- [PMM Community Forums](https://per.co.na/PMM3_forums) 
 - [Contact Percona Support](https://www.percona.com/services/support) 
-- Report bugs or technical issues through the [PMM JIRA Issue Tracker](https://perconadev.atlassian.net/jira/software/c/projects/PMM/issues/)
+- [Report bugs or technical issues](https://perconadev.atlassian.net/jira/software/c/projects/PMM/issues/)
 
 ### Share your experience
 
