@@ -210,17 +210,16 @@ docker exec pmm-server supervisorctl restart nginx
 
 ### Connect monitoring clients
 
-Connect PMM Clients to start monitoring your databases:
+To monitor your databases, install PMM Client on each database host and connect it to PMM Server:
+{.power-number}
+
+1. [Install PMM Client](../install-pmm/install-pmm-client/index.md) on your database hosts.
+
+2. Connect to PMM Server and add your database:
 ```sh
-# Install PMM Client on database host
-curl -fsSL https://www.percona.com/downloads/pmm3/pmm-client.sh | sh
-
-# Connect to PMM Server
 pmm-admin config --server-url=https://admin:password@pmm-server:443
-
-# Add database service (example: MySQL)
-pmm-admin add mysql --username=admin --password=password
 ```
+3. [Add a database service](../install-pmm/install-pmm-client/add-services.md) for monitoring.
 
 ### Test automatic restart
 

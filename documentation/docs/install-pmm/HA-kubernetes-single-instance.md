@@ -429,24 +429,34 @@ resources:
 ## Operations
 
 ### Connect monitoring clients
+To monitor your databases, install PMM Client on each database host and connect it to PMM Server:
+{.power-number}
 
-Install and configure PMM Client on your database hosts:
+1.[Install PMM Client](../install-pmm/install-pmm-client/index.md) on your database hosts.
 ```sh
 # Install PMM Client
-curl -fsSL https://www.percona.com/downloads/pmm2/pmm-client.sh | sh
+curl -fsSL https://www.percona.com/downloads/pmm3/pmm-client.sh | sh
+```
 
-# Get PMM Server address
+2. Get the PMM Server address:
+
+```sh
+# For hostname-based load balancers
 export PMM_SERVER=$(kubectl get svc -n monitoring pmm-service \
   -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
 
-# Or for IP-based load balancers:
+# Or for IP-based load balancers, uncomment the following:
 # export PMM_SERVER=$(kubectl get svc -n monitoring pmm-service \
 #   -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+```
 
-# Connect to PMM Server
+3. Connect to PMM Server and add your database:
+
+```sh
+# Configure PMM Client with the server URL
 pmm-admin config --server-url=https://admin:password@${PMM_SERVER}:443
 
-# Add database service (example: MySQL)
+# Add a database service (example: MySQL)
 pmm-admin add mysql \
   --username=pmm \
   --password=pass \

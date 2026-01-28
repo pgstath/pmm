@@ -11,4 +11,4 @@ extra:
 theme:
   name: material
   features:
-content.images.zoom
+    - content.images.zoom
