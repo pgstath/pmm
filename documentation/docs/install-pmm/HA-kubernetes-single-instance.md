@@ -432,37 +432,35 @@ resources:
 To monitor your databases, install PMM Client on each database host and connect it to PMM Server:
 {.power-number}
 
-1.[Install PMM Client](../install-pmm/install-pmm-client/index.md) on your database hosts.
-```sh
-# Install PMM Client
-curl -fsSL https://www.percona.com/downloads/pmm3/pmm-client.sh | sh
-```
+1. [Install PMM Client](../install-pmm/install-pmm-client/index.md) on your database hosts:
+  ```sh
+  # Install PMM Client
+  curl -fsSL https://www.percona.com/downloads/pmm3/pmm-client.sh | sh
+  ```
 
 2. Get the PMM Server address:
+  ```sh
+  # For hostname-based load balancers
+  export PMM_SERVER=$(kubectl get svc -n monitoring pmm-service \
+    -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
 
-```sh
-# For hostname-based load balancers
-export PMM_SERVER=$(kubectl get svc -n monitoring pmm-service \
-  -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-
-# Or for IP-based load balancers, uncomment the following:
-# export PMM_SERVER=$(kubectl get svc -n monitoring pmm-service \
-#   -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-```
+  # Or for IP-based load balancers, uncomment the following:
+  # export PMM_SERVER=$(kubectl get svc -n monitoring pmm-service \
+  #   -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+  ```
 
 3. Connect to PMM Server and add your database:
+  ```sh
+  # Configure PMM Client with the server URL
+  pmm-admin config --server-url=https://admin:password@${PMM_SERVER}:443
 
-```sh
-# Configure PMM Client with the server URL
-pmm-admin config --server-url=https://admin:password@${PMM_SERVER}:443
-
-# Add a database service (example: MySQL)
-pmm-admin add mysql \
-  --username=pmm \
-  --password=pass \
-  --query-source=perfschema \
-  --host=mysql-host
-```
+  # Add a database service (example: MySQL)
+  pmm-admin add mysql \
+    --username=pmm \
+    --password=pass \
+    --query-source=perfschema \
+    --host=mysql-host
+  ```
 
 ### Test automatic recovery
 
