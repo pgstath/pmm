@@ -178,20 +178,6 @@ After first login, immediately change the default admin password:
 3. Click **Change Password**
 4. Enter current password (`admin`) and new secure password
 
-### Configure data retention
-
-Set how long PMM retains monitoring data:
-```sh
-docker exec pmm-server \
-  pmm-admin config --data-retention=30d
-```
-
-Common retention periods:
-
-- `7d`: 7 days (minimal storage, short troubleshooting window)
-- `30d`: 30 days (recommended for most deployments)
-- `90d`: 90 days (compliance/audit requirements)
-
 ### Enable external access
 
 By default, PMM Server listens on all interfaces. To restrict access:
@@ -233,7 +219,7 @@ curl -fsSL https://www.percona.com/downloads/pmm3/pmm-client.sh | sh
 pmm-admin config --server-url=https://admin:password@pmm-server:443
 
 # Add database service (example: MySQL)
-pmm-admin add mysql --username=admin --password=password --query-source=perfschema
+pmm-admin add mysql --username=admin --password=password
 ```
 
 ### Test automatic restart
@@ -365,9 +351,6 @@ docker logs pmm-server
 **Solution**: Reduce retention period or check resource usage:
 
 ```sh
-# Reduce retention to 7 days
-docker exec pmm-server pmm-admin config --data-retention=7d
-
 # Check container resource usage
 docker stats pmm-server --no-stream
 
