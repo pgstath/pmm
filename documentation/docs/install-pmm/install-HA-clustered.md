@@ -17,7 +17,7 @@ Before you start, make sure you understand how HA Clustered works. See [Understa
 
 ### Understand two-step installation
 
-PMM HA Clustered uses a two-step installation process that separates database operators from monitoring components. This separation simplifies upgrades and prevents cleanup issues when uninstalling.
+PMM High Availability Cluster uses a two-step installation process that separates database operators from monitoring components. This separation simplifies upgrades and prevents cleanup issues when uninstalling.
 
 #### Step 1: Install operators
 

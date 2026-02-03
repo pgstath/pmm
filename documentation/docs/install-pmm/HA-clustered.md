@@ -1,4 +1,4 @@
-# Understand PMM HA Clustered
+# Understand PMM High Availability Cluster
 
 !!! warning "Technical Preview: Not production-ready"
     This feature is in **Technical Preview** for testing and feedback only. Expect [known issues](../install-pmm/install-HA-clustered.md#known-issues), breaking changes, and incomplete features.
@@ -13,11 +13,11 @@
     
     If your strategy requires these features, evaluate carefully before testing.
  
-Standard PMM monitoring goes offline for minutes during server failures. PMM HA Clustered keeps monitoring running with automatic failover in under 30 seconds.
+Standard PMM monitoring goes offline for minutes during server failures. PMM HA Cluster keeps monitoring running with automatic failover in under 30 seconds.
 
-PMM HA Clustered keeps your database monitoring running continuously, even when servers fail or during maintenance windows.
+PMM HA Cluster keeps your database monitoring running continuously, even when servers fail or during maintenance windows.
 
-Unlike [Single-Instance deployments](../install-pmm/HA-kubernetes-single-instance.md) where a server failure means minutes of monitoring downtime, PMM HA Clustered automatically switches to backup servers in under 30 seconds. 
+Unlike [Single-Instance deployments](../install-pmm/HA-kubernetes-single-instance.md) where a server failure means minutes of monitoring downtime, PMM HA Cluster automatically switches to backup servers in under 30 seconds. 
 
 Whether a server crashes, you're upgrading software, or scaling your infrastructure, your monitoring stays active with no blind spots or missed incidents.
 
@@ -143,8 +143,8 @@ PMM HA uses several mechanisms to ensure continuous operation:
 
 ## Ready to deploy?
 
-Now that you understand how PMM HA Clustered works, you can deploy it on your Kubernetes cluster. 
+Now that you understand how PMM HA Cluster works, you can deploy it on your Kubernetes cluster. 
 
 The installation process uses Helm to set up all three replicas, configure HAProxy load balancing, and deploy the distributed databases automatically.
 
-[Install PMM HA Clustered →](../install-pmm/install-HA-clustered.md){.md-button} 
+[Install PMM HA Cluster →](../install-pmm/install-HA-clustered.md){.md-button} 

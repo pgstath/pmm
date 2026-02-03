@@ -2,7 +2,7 @@
 
 ![PMM HA Health Overview Dashboard](../../images/PMM_HA_Health_Overview.png)
 
-The PMM HA Health Overview dashboard provides at-a-glance monitoring of your PMM HA Clustered deployment health. 
+The PMM HA Health Overview dashboard provides at-a-glance monitoring of your PMM High Availability Cluster deployment health. 
 
 Use this dashboard to quickly identify component failures, resource constraints, and stability issues across your high-availability infrastructure.
 
